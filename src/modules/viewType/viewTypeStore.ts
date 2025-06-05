@@ -14,7 +14,7 @@ const useInitViewTypeStore = create<TStore>()(
       setData: (data) => set({ data }),
     }),
     {
-      name: "pocketdrop-view-type-storage",
+      name: "view-type-storage",
     },
   ),
 );

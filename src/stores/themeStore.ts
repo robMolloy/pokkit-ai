@@ -16,7 +16,7 @@ const useInitThemeStore = create<ThemeState>()(
       setData: (data) => set({ data }),
     }),
     {
-      name: "pocketdrop-theme",
+      name: "theme",
     },
   ),
 );
