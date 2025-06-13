@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { pb } from "@/config/pocketbaseConfig";
 import { logout } from "@/modules/auth/dbAuthUtils";
-import { useDirectoryTreeStore } from "@/modules/files/directoriesStore";
 import { useUsersStore } from "@/modules/users/usersStore";
 import { useAiStore } from "@/stores/aiStore";
 import { useCurrentUserStore } from "@/stores/authDataStore";
@@ -9,7 +8,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
 import { CustomIcon } from "../CustomIcon";
-import { DirectoryTree } from "../DirectoryTree";
 
 const SidebarButtonWrapper = (p: { children: ReactNode; href?: string; disabled?: boolean }) => {
   return p.href ? (
@@ -58,7 +56,6 @@ const SidebarButton = (p: {
 
 export function LeftSidebar() {
   const router = useRouter();
-  const directoryTreeStore = useDirectoryTreeStore();
   const currentUserStore = useCurrentUserStore();
   const usersStore = useUsersStore();
   const pendingUsersCount = usersStore.data.filter((user) => user.status === "pending").length;
@@ -72,13 +69,6 @@ export function LeftSidebar() {
             Home
           </SidebarButton>
           <SidebarButton
-            href="/starred"
-            iconName="star"
-            isHighlighted={router.pathname === "/starred"}
-          >
-            Starred
-          </SidebarButton>
-          <SidebarButton
             disabled={!aiStore.data}
             href="/ai-chat"
             iconName="brain"
@@ -86,9 +76,6 @@ export function LeftSidebar() {
           >
             AI Chat
           </SidebarButton>
-          {directoryTreeStore.tree !== undefined && (
-            <DirectoryTree data={directoryTreeStore.tree} />
-          )}
         </div>
       </div>
 

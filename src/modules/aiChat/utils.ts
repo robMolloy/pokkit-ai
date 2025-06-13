@@ -1,8 +1,5 @@
 import { z } from "zod";
 import { chatMessageContentItemSchema } from "./anthropicApi";
-import { getFile, TFileRecord } from "../files/dbFilesUtils";
-import { getMediaType } from "@/components/FileIcon";
-import { pb } from "@/config/pocketbaseConfig";
 
 export const convertFileToBase64 = async (file: File) => {
   const resp = await new Promise<string>((resolve, reject) => {
@@ -13,13 +10,6 @@ export const convertFileToBase64 = async (file: File) => {
   });
 
   return z.string().safeParse(resp.split(";base64,")[1]);
-};
-
-export const createFileObjectFromFileRecord = async (file: TFileRecord) => {
-  const fileResp = await getFile({ pb, id: file.id, isThumb: false });
-  if (!fileResp.success) return fileResp;
-  const type = getMediaType(fileResp.data);
-  return new File([fileResp.data?.file], fileResp.data?.name, { type });
 };
 
 export const convertFileToChatMessageContentFromFile = async (file: File) => {

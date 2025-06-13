@@ -1,10 +1,6 @@
 import { Layout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
 import { AuthForm } from "@/modules/auth/AuthForm";
-import { smartSubscribeToDirectories } from "@/modules/directories/dbDirectoriesUtils";
-import { smartSubscribeToFiles } from "@/modules/files/dbFilesUtils";
-import { useDirectoriesStore } from "@/modules/files/directoriesStore";
-import { useFilesStore } from "@/modules/files/filesStore";
 import { smartSubscribeToSettings } from "@/modules/settings/dbSettingsUtils";
 import { useSettingsStore } from "@/modules/settings/settingsStore";
 import { smartSubscribeToUsers, subscribeToUser } from "@/modules/users/dbUsersUtils";
@@ -25,8 +21,6 @@ import { useEffect } from "react";
 export default function App({ Component, pageProps }: AppProps) {
   const themeStore = useThemeStore();
   const unverifiedIsLoggedInStore = useUnverifiedIsLoggedInStore();
-  const filesStore = useFilesStore();
-  const directoriesStore = useDirectoriesStore();
   const usersStore = useUsersStore();
   const settingsStore = useSettingsStore();
   const currentUserStore = useCurrentUserStore();
@@ -61,13 +55,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     if (currentUserStore.data.status === "loggedIn") {
-      smartSubscribeToDirectories({ pb, onChange: (x) => directoriesStore.setData(x) });
-      smartSubscribeToFiles({ pb, onChange: (x) => filesStore.setData(x) });
       smartSubscribeToUsers({ pb, onChange: (x) => usersStore.setData(x) });
       smartSubscribeToSettings({ pb, onChange: (x) => settingsStore.setData(x) });
     } else {
-      directoriesStore.clear();
-      filesStore.clear();
       usersStore.clear();
       settingsStore.clear();
     }

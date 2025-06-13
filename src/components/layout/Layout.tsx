@@ -1,6 +1,4 @@
-import { useRightSidebarStore } from "@/stores/rightSidebarStore";
 import { Header } from "./Header";
-import { RightSidebar } from "./RightSidebar";
 import { LeftSidebar } from "./LeftSidebar";
 import { Modal } from "../Modal";
 
@@ -18,8 +16,6 @@ export const MainLayout = (p: {
 };
 
 export function Layout(p: { children: React.ReactNode; showLeftSidebar: boolean }) {
-  const rightSidebarStore = useRightSidebarStore();
-
   return (
     <div className="relative flex min-h-screen flex-col">
       <Header />
@@ -31,10 +27,6 @@ export function Layout(p: { children: React.ReactNode; showLeftSidebar: boolean 
         )}
         <main className="h-[calc(100vh-3.5rem)] w-full overflow-y-auto">{p.children}</main>
       </div>
-      <RightSidebar
-        isOpen={rightSidebarStore.data !== null}
-        onClose={() => rightSidebarStore.setData(null)}
-      />
       <Modal />
     </div>
   );
