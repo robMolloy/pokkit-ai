@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "tsc": "tsc --noemit --watch",
+    "tsc": "node_modules/.bin/tsc --noemit --watch",
     "lint": "next lint",
     "db:start": "./pocketbase-leader/pocketbase serve",
     "db:start:dev": "pocketbase-leader/start-pocketbase.js",
