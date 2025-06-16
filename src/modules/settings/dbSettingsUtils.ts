@@ -5,9 +5,8 @@ const settingsRecordSchema = z.object({
   collectionId: z.string(),
   collectionName: z.string(),
   id: z.string(),
-  settingName: z.string(),
-  isEnabled: z.boolean(),
-  value: z.string(),
+  provider: z.string(),
+  apiKey: z.string(),
   created: z.string(),
   updated: z.string(),
 });

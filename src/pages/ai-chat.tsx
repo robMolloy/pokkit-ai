@@ -9,7 +9,7 @@ import {
   DisplayChatMessages,
   ErrorMessage,
 } from "@/modules/aiChat/components/Messages";
-import { useAiStore } from "@/stores/aiStore";
+import { useAnthropicStore } from "@/stores/anthropicStore";
 import { useEffect, useRef, useState } from "react";
 
 const ScrollContainer = (p: { children: React.ReactNode; className?: string }) => {
@@ -67,8 +67,8 @@ const ScrollContainer = (p: { children: React.ReactNode; className?: string }) =
 };
 
 const AiChat = () => {
-  const aiStore = useAiStore();
-  const aiInstance = aiStore.data;
+  const anthropicStore = useAnthropicStore();
+  const anthropicInstance = anthropicStore.data;
   const [mode, setMode] = useState<"ready" | "thinking" | "streaming" | "error">("ready");
   const [messages, setMessages] = useState<TChatMessage[]>([]);
   const [streamedResponse, setStreamedResponse] = useState("");
@@ -89,9 +89,9 @@ const AiChat = () => {
         </ScrollContainer>
 
         <div className="p-4 pt-1">
-          {aiInstance ? (
+          {anthropicInstance ? (
             <AiChatForm
-              anthropic={aiInstance}
+              anthropic={anthropicInstance}
               messages={messages}
               onModeChange={setMode}
               onUpdatedMessages={setMessages}

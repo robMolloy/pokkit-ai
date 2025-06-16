@@ -18,6 +18,6 @@ export const useSettingsStore = () => {
 
   return {
     ...store,
-    aiChatSetting: { get: () => store.data?.find((x) => x.settingName === "aiChat") },
+    anthropicSetting: { get: () => store.data?.find((x) => x.provider === "anthropic") },
   };
 };

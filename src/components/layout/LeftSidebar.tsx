@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { pb } from "@/config/pocketbaseConfig";
 import { logout } from "@/modules/auth/dbAuthUtils";
 import { useUsersStore } from "@/modules/users/usersStore";
-import { useAiStore } from "@/stores/aiStore";
+import { useAnthropicStore } from "@/stores/anthropicStore";
 import { useCurrentUserStore } from "@/stores/authDataStore";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -60,7 +60,7 @@ export function LeftSidebar() {
   const usersStore = useUsersStore();
   const pendingUsersCount = usersStore.data.filter((user) => user.status === "pending").length;
 
-  const aiStore = useAiStore();
+  const anthropicStore = useAnthropicStore();
   return (
     <div className={"flex h-full flex-col"}>
       <div className="flex-1 overflow-y-auto p-2">
@@ -69,7 +69,7 @@ export function LeftSidebar() {
             Home
           </SidebarButton>
           <SidebarButton
-            disabled={!aiStore.data}
+            disabled={!anthropicStore.data}
             href="/ai-chat"
             iconName="brain"
             isHighlighted={router.pathname === "/ai-chat"}

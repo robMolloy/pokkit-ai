@@ -8,6 +8,8 @@ export const docMediaTypeSchema = z.literal("application/pdf");
 export const mediaTypeSchema = z.union([imageMediaTypeSchema, docMediaTypeSchema]);
 export type TMediaType = z.infer<typeof mediaTypeSchema>;
 
+type TStreamStatus = "streaming" | "finished" | "error";
+
 export const chatMessageContentImageSchema = z.object({
   type: z.literal("image"),
   source: z.object({
@@ -50,15 +52,17 @@ export const createUserMessage = (content: TChatMessageContent): TChatMessage =>
   return { id: uuid(), role: "user", content };
 };
 
-export const callClaude = async (p: {
+export const callAnthropic = async (p: {
   anthropic: Anthropic;
   messages: Omit<TChatMessage, "id">[];
-  onFirstStream: () => void;
-  onStream: (text: string) => void;
+  onStreamStatusChange: (status: "streaming" | "finished" | "error") => void;
+  onStreamChange: (text: string) => void;
   model?: "claude-3-5-haiku-20241022" | "claude-3-7-sonnet-20250219";
 }) => {
   const model = p.model ?? "claude-3-5-haiku-20241022";
-  let firstStream = true;
+  let streamStatus: TStreamStatus = "streaming";
+  let fullResponse = "";
+
   try {
     const stream = await p.anthropic.messages.create({
       model,
@@ -67,20 +71,24 @@ export const callClaude = async (p: {
       stream: true,
     });
 
-    let fullResponse = "";
     for await (const message of stream) {
-      if (firstStream) {
-        p.onFirstStream();
-        firstStream = false;
+      if (streamStatus !== "streaming") {
+        streamStatus = "streaming";
+        p.onStreamStatusChange("streaming");
       }
+
       if (message.type === "content_block_delta" && "text" in message.delta) {
         fullResponse += message.delta.text;
-        p.onStream(fullResponse);
+        p.onStreamChange(fullResponse);
       }
     }
 
+    p.onStreamStatusChange("finished");
+
     return { success: true, data: fullResponse } as const;
   } catch (error) {
+    p.onStreamStatusChange("error");
+
     return { success: false, error: error } as const;
   }
 };

@@ -6,7 +6,7 @@ import { useSettingsStore } from "@/modules/settings/settingsStore";
 import { smartSubscribeToUsers, subscribeToUser } from "@/modules/users/dbUsersUtils";
 import { useUsersStore } from "@/modules/users/usersStore";
 import { LoadingScreen } from "@/screens/LoadingScreen";
-import { useAiStoreSync } from "@/stores/aiStore";
+import { useAnthropicStoreSync } from "@/stores/anthropicStore";
 import {
   useCurrentUserStore,
   useUnverifiedIsLoggedInStore,
@@ -27,7 +27,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   themeStore.useThemeStoreSideEffect();
   useUnverifiedIsLoggedInSync({ pb });
-  useAiStoreSync();
+  useAnthropicStoreSync();
 
   useEffect(() => {
     // use anfn as return value is not cleanup

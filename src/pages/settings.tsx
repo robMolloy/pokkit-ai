@@ -1,13 +1,12 @@
 import { CustomIcon } from "@/components/CustomIcon";
 import { MainLayout } from "@/components/layout/Layout";
-import { OptimisticSwitch } from "@/components/OptimisticSwitch";
 import { H1 } from "@/components/ui/defaultComponents";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { pb } from "@/config/pocketbaseConfig";
 import { createSetting, updateSetting } from "@/modules/settings/dbSettingsUtils";
 import { LoadingScreen } from "@/screens/LoadingScreen";
-import { useAiStore } from "@/stores/aiStore";
+import { useAnthropicStore } from "@/stores/anthropicStore";
 import { debounce } from "lodash";
 import { useState } from "react";
 import { useSettingsStore } from "../modules/settings/settingsStore";
@@ -52,22 +51,14 @@ export const SettingItem = (p: {
   return content;
 };
 
-const HorizontalSpacer = () => {
-  return <div className="my-4 h-px bg-secondary" />;
-};
-
 const SettingsScreen = () => {
   const settingsStore = useSettingsStore();
 
-  const versionHistorySetting = settingsStore.data?.find((x) => x.settingName === "versionHistory");
-  const clientSideEncryptionSetting = settingsStore.data?.find(
-    (x) => x.settingName === "clientSideEncryption",
-  );
-  const aiChatSetting = settingsStore.data?.find((x) => x.settingName === "aiChat");
+  const anthropicSetting = settingsStore.data?.find((x) => x.provider === "anthropic");
 
-  const aiStore = useAiStore();
+  const anthropicStore = useAnthropicStore();
 
-  const [aiChatSettingValue, setAiChatSettingValue] = useState(aiChatSetting?.value ?? "");
+  const [anthropicApiKey, setAnthropicApiKey] = useState(anthropicSetting?.apiKey ?? "");
 
   return (
     <>
@@ -76,79 +67,38 @@ const SettingsScreen = () => {
       <br />
 
       <div>
-        <SettingItem
-          title="Use AI Chat"
-          description="Allow AI chat and index your files with suitable keywords to allow smart search"
-        >
+        <SettingItem title="Anthropic API Key" description="API key for Anthropic">
           <div className="flex flex-col items-end justify-end gap-2">
-            <OptimisticSwitch
-              checked={aiChatSetting?.isEnabled ?? false}
-              onCheckedChange={(isEnabled) => {
-                if (aiChatSetting)
-                  return updateSetting({ pb, data: { ...aiChatSetting, isEnabled } });
-
-                return createSetting({ pb, data: { settingName: "aiChat", isEnabled } });
-              }}
-            />
-
             <div className="flex items-center gap-2">
               <Input
-                disabled={!aiChatSetting?.isEnabled}
-                value={aiChatSettingValue}
+                value={anthropicApiKey}
                 onChange={async (e) => {
-                  setAiChatSettingValue(e.target.value);
-                  if (!aiChatSetting) return; // won't get hit - disabled switch will prevent this
-                  aiStore.setData(undefined);
+                  setAnthropicApiKey(e.target.value);
 
-                  await debouncedUpdate({ pb, data: { ...aiChatSetting, value: e.target.value } });
+                  anthropicStore.setData(undefined);
+
+                  anthropicSetting
+                    ? debouncedUpdate({
+                        pb,
+                        data: { ...anthropicSetting, apiKey: e.target.value },
+                      })
+                    : createSetting({
+                        pb,
+                        data: { provider: "anthropic", apiKey: e.target.value },
+                      });
                 }}
               />
-              {aiStore.data && <CustomIcon iconName="check" className="text-success" size="sm" />}
-              {aiStore.data === null && (
+              {anthropicStore.data && (
+                <CustomIcon iconName="check" className="text-success" size="sm" />
+              )}
+              {anthropicStore.data === null && (
                 <CustomIcon iconName="x" className="text-destructive" size="sm" />
               )}
-              {aiStore.data === undefined && (
+              {anthropicStore.data === undefined && (
                 <CustomIcon iconName="loader" size="sm" className="animate-spin" />
               )}
             </div>
           </div>
-        </SettingItem>
-        <HorizontalSpacer />
-        <SettingItem
-          title="Store Version History"
-          description="Keep track of file changes and maintain version history"
-        >
-          <OptimisticSwitch
-            checked={versionHistorySetting?.isEnabled ?? false}
-            onCheckedChange={(isEnabled) => {
-              if (versionHistorySetting)
-                return updateSetting({ pb, data: { ...versionHistorySetting, isEnabled } });
-
-              return createSetting({ pb, data: { settingName: "versionHistory", isEnabled } });
-            }}
-          />
-        </SettingItem>
-
-        <HorizontalSpacer />
-
-        <SettingItem
-          title="Client-Side File Encryption"
-          description="Enable client-side encryption when storing files - whether on or off, always use https to ensure files are encrypted when being sent to the server"
-          disabledTooltip="File encryption is not yet implemented"
-        >
-          <OptimisticSwitch
-            checked={clientSideEncryptionSetting?.isEnabled ?? false}
-            disabled={true}
-            onCheckedChange={(isEnabled) => {
-              if (clientSideEncryptionSetting)
-                return updateSetting({ pb, data: { ...clientSideEncryptionSetting, isEnabled } });
-
-              return createSetting({
-                pb,
-                data: { settingName: "clientSideEncryption", isEnabled },
-              });
-            }}
-          />
         </SettingItem>
       </div>
     </>

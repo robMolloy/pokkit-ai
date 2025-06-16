@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  callClaude,
+  callAnthropic,
   createAssistantMessage,
   createUserMessage,
   TChatMessage,
@@ -39,11 +39,11 @@ export const AiChatForm = (p: {
     setCurrentInput("");
     setCurrentImages([]);
 
-    const resp = await callClaude({
+    const resp = await callAnthropic({
       anthropic: p.anthropic,
       messages: updatedMessages.map((x) => ({ role: x.role, content: x.content })),
-      onFirstStream: () => setMode("streaming"),
-      onStream: (text) => p.onStream(text),
+      onStreamStatusChange: (x) => setMode(x === "finished" ? "ready" : x),
+      onStreamChange: (text) => p.onStream(text),
     });
 
     if (!resp.success) {
@@ -51,7 +51,6 @@ export const AiChatForm = (p: {
       return setMode("error");
     }
 
-    setMode("ready");
     p.onComplete([...updatedMessages, createAssistantMessage(resp.data)]);
   };
 
