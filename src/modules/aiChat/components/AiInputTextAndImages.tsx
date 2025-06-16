@@ -64,7 +64,7 @@ export const AiInputTextAndMedia = (p: {
                 onClick={() => p.onInputImages(p.images.filter((_, i) => i !== index))}
                 className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"
               >
-                <CustomIcon iconName="x" size="xs" />
+                <CustomIcon iconName="X" size="xs" />
               </button>
             </div>
           ))}
@@ -88,7 +88,7 @@ export const AiInputTextAndMedia = (p: {
             disabled={p.disabled}
             className="absolute bottom-3 right-1 h-8 w-8 p-0"
           >
-            <CustomIcon iconName="upload" size="sm" />
+            <CustomIcon iconName="Upload" size="sm" />
           </Button>
         </div>
       </div>

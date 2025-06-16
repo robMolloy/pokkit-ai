@@ -59,7 +59,7 @@ const ScrollContainer = (p: { children: React.ReactNode; className?: string }) =
           className="absolute bottom-4 right-8 h-10 w-10 rounded-full shadow-lg transition-colors hover:bg-gray-100"
           aria-label="Scroll to bottom"
         >
-          <CustomIcon iconName="chevronDown" size="lg" />
+          <CustomIcon iconName="ChevronDown" size="lg" />
         </Button>
       )}
     </div>

@@ -86,13 +86,13 @@ const ProvidersScreen = () => {
                 }}
               />
               {anthropicStore.data && (
-                <CustomIcon iconName="check" className="text-success" size="sm" />
+                <CustomIcon iconName="Check" className="text-success" size="sm" />
               )}
               {anthropicStore.data === null && (
-                <CustomIcon iconName="x" className="text-destructive" size="sm" />
+                <CustomIcon iconName="X" className="text-destructive" size="sm" />
               )}
               {anthropicStore.data === undefined && (
-                <CustomIcon iconName="loader" size="sm" className="animate-spin" />
+                <CustomIcon iconName="Loader" size="sm" className="animate-spin" />
               )}
             </div>
           </div>

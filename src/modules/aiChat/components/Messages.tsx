@@ -42,7 +42,7 @@ export const ErrorMessage = () => {
       <Card className="/10 w-full max-w-md border-destructive">
         <CardContent className="flex items-center gap-3 p-4">
           <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground">
-            <CustomIcon iconName="x" size="sm" />
+            <CustomIcon iconName="X" size="sm" />
           </div>
           <p className="font-medium">There has been an error processing your request.</p>
         </CardContent>

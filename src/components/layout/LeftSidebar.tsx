@@ -65,13 +65,13 @@ export function LeftSidebar() {
     <div className={"flex h-full flex-col"}>
       <div className="flex-1 overflow-y-auto p-2">
         <div className="flex flex-col gap-1">
-          <SidebarButton href="/" iconName={"home"} isHighlighted={router.pathname === "/"}>
+          <SidebarButton href="/" iconName={"Home"} isHighlighted={router.pathname === "/"}>
             Home
           </SidebarButton>
           <SidebarButton
             disabled={!anthropicStore.data}
             href="/ai-chat"
-            iconName="brain"
+            iconName="Brain"
             isHighlighted={router.pathname === "/ai-chat"}
           >
             AI Chat
@@ -85,7 +85,7 @@ export function LeftSidebar() {
             currentUserStore.data.user.status === "admin" && (
               <SidebarButton
                 href="/users"
-                iconName="users"
+                iconName="Users"
                 isHighlighted={router.pathname === "/users"}
                 badgeCount={pendingUsersCount}
               >
@@ -96,13 +96,13 @@ export function LeftSidebar() {
             currentUserStore.data.user.status === "admin" && (
               <SidebarButton
                 href="/providers"
-                iconName="brain"
+                iconName="Brain"
                 isHighlighted={router.pathname === "/providers"}
               >
                 Providers
               </SidebarButton>
             )}
-          <SidebarButton iconName="logOut" isHighlighted={false} onClick={() => logout({ pb })}>
+          <SidebarButton iconName="LogOut" isHighlighted={false} onClick={() => logout({ pb })}>
             Log Out
           </SidebarButton>
         </div>

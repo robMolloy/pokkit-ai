@@ -16,7 +16,7 @@ export function ThemeToggle() {
       })()}
     >
       <CustomIcon
-        iconName={theme === "light" ? "sun" : theme === "dark" ? "moon" : "monitor"}
+        iconName={theme === "light" ? "Sun" : theme === "dark" ? "Moon" : "Monitor"}
         size="sm"
       />
       <span className="sr-only">Toggle theme</span>

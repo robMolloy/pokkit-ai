@@ -118,7 +118,7 @@ const UsersPage = () => {
                         );
                       }}
                     >
-                      <CustomIcon iconName="trash2" size="md" className="text-destructive" />
+                      <CustomIcon iconName="Trash2" size="md" className="text-destructive" />
                     </Button>
                   )}
                 </TableCell>

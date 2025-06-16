@@ -26,7 +26,7 @@ export const DisplayFilePdfPreview = (p: { file: File }) => {
 export const DisplayFileOtherPreview = (p: { fileName: string }) => {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center rounded-md border border-input bg-muted p-2">
-      <CustomIcon iconName="file" size="lg" />
+      <CustomIcon iconName="File" size="lg" />
       <span className="mt-1 truncate text-xs">{p.fileName}</span>
     </div>
   );
