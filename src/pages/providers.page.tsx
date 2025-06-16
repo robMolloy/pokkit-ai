@@ -9,7 +9,7 @@ import { LoadingScreen } from "@/screens/LoadingScreen";
 import { useAnthropicStore } from "@/stores/anthropicStore";
 import { debounce } from "lodash";
 import { useState } from "react";
-import { useProvidersStore } from "../modules/providers/providersStore";
+import { useProviderRecordsStore } from "../modules/providers/providerRecordsStore";
 
 const debouncedUpdate = debounce(
   (p: Parameters<typeof updateProvider>[0]) => updateProvider(p),
@@ -51,7 +51,7 @@ export const SettingItem = (p: {
 };
 
 const ProvidersScreen = () => {
-  const providersStore = useProvidersStore();
+  const providersStore = useProviderRecordsStore();
 
   const anthropic = providersStore.anthropic;
 
@@ -105,7 +105,7 @@ const ProvidersScreen = () => {
 };
 
 const ProvidersPage = () => {
-  const providersStore = useProvidersStore();
+  const providersStore = useProviderRecordsStore();
 
   return (
     <MainLayout>

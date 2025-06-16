@@ -1,5 +1,5 @@
 import { callAnthropic } from "@/modules/aiChat/anthropicApi";
-import { useProvidersStore } from "@/modules/providers/providersStore";
+import { useProviderRecordsStore } from "@/modules/providers/providerRecordsStore";
 import Anthropic from "@anthropic-ai/sdk";
 import { useEffect } from "react";
 import { create } from "zustand";
@@ -23,17 +23,17 @@ export const useAnthropicStore = () => {
 };
 
 export const useAnthropicStoreSync = () => {
-  const settingsStore = useProvidersStore();
-
-  const anthropicSetting = settingsStore.anthropic;
   const initAnthropicStore = useInitAnthropicStore();
+  const providerRecordsStore = useProviderRecordsStore();
+  const anthropicRecord = providerRecordsStore.anthropic;
+
   useEffect(() => {
-    if (!anthropicSetting?.apiKey) return initAnthropicStore.setData(null);
+    if (!anthropicRecord?.apiKey) return initAnthropicStore.setData(null);
 
     initAnthropicStore.setData(undefined);
 
     const anthropic = new Anthropic({
-      apiKey: anthropicSetting.apiKey,
+      apiKey: anthropicRecord.apiKey,
       dangerouslyAllowBrowser: true,
     });
 
@@ -47,5 +47,5 @@ export const useAnthropicStoreSync = () => {
 
       initAnthropicStore.setData(resp.success ? anthropic : null);
     })();
-  }, [anthropicSetting]);
+  }, [anthropicRecord]);
 };

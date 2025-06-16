@@ -3,7 +3,7 @@ import { TProviderRecord } from "./dbProvidersUtils";
 
 type TState = TProviderRecord[] | undefined;
 
-const useInitProvidersStore = create<{
+const useInitProviderRecordsStore = create<{
   data: TState;
   setData: (x: TState) => void;
   clear: () => void;
@@ -13,8 +13,8 @@ const useInitProvidersStore = create<{
   clear: () => set(() => ({ data: undefined })),
 }));
 
-export const useProvidersStore = () => {
-  const store = useInitProvidersStore();
+export const useProviderRecordsStore = () => {
+  const store = useInitProviderRecordsStore();
 
   return {
     ...store,

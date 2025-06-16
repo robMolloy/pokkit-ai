@@ -2,7 +2,7 @@ import { Layout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
 import { AuthForm } from "@/modules/auth/AuthForm";
 import { smartSubscribeToProviders } from "@/modules/providers/dbProvidersUtils";
-import { useProvidersStore } from "@/modules/providers/providersStore";
+import { useProviderRecordsStore } from "@/modules/providers/providerRecordsStore";
 import { smartSubscribeToUsers, subscribeToUser } from "@/modules/users/dbUsersUtils";
 import { useUsersStore } from "@/modules/users/usersStore";
 import { LoadingScreen } from "@/screens/LoadingScreen";
@@ -22,7 +22,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const themeStore = useThemeStore();
   const unverifiedIsLoggedInStore = useUnverifiedIsLoggedInStore();
   const usersStore = useUsersStore();
-  const providersStore = useProvidersStore();
+  const providerRecordsStore = useProviderRecordsStore();
   const currentUserStore = useCurrentUserStore();
 
   themeStore.useThemeStoreSideEffect();
@@ -56,10 +56,10 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (currentUserStore.data.status === "loggedIn") {
       smartSubscribeToUsers({ pb, onChange: (x) => usersStore.setData(x) });
-      smartSubscribeToProviders({ pb, onChange: (x) => providersStore.setData(x) });
+      smartSubscribeToProviders({ pb, onChange: (x) => providerRecordsStore.setData(x) });
     } else {
       usersStore.clear();
-      providersStore.clear();
+      providerRecordsStore.clear();
     }
   }, [currentUserStore.data]);
 
