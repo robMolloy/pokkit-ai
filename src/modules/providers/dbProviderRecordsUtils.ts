@@ -14,7 +14,7 @@ export type TProviderRecord = z.infer<typeof providerRecordSchema>;
 
 export const listProviderRecords = async (p: { pb: PocketBase }) => {
   try {
-    const initData = await p.pb.collection("providers").getFullList({
+    const initData = await p.pb.collection("aiProviders").getFullList({
       sort: "-created",
     });
 
@@ -31,35 +31,44 @@ export const listProviderRecords = async (p: { pb: PocketBase }) => {
 export const smartSubscribeToProviderRecords = async (p: {
   pb: PocketBase;
   onChange: (x: TProviderRecord[]) => void;
+  onError: () => void;
 }) => {
   const listProvidersResp = await listProviderRecords(p);
-  if (!listProvidersResp.success) return listProvidersResp;
+  if (!listProvidersResp.success) {
+    p.onError();
+    return listProvidersResp;
+  }
 
   let allProviders = listProvidersResp.data;
   p.onChange(allProviders);
 
-  const unsub = p.pb.collection("providers").subscribe("*", (e) => {
-    if (e.action === "create") {
-      const parseResp = providerRecordSchema.safeParse(e.record);
-      if (parseResp.success) allProviders.push(parseResp.data);
-    }
-    if (e.action === "update") {
-      const parseResp = providerRecordSchema.safeParse(e.record);
-      if (!parseResp.success) return;
+  try {
+    const unsub = p.pb.collection("aiProviders").subscribe("*", (e) => {
+      if (e.action === "create") {
+        const parseResp = providerRecordSchema.safeParse(e.record);
+        if (parseResp.success) allProviders.push(parseResp.data);
+      }
+      if (e.action === "update") {
+        const parseResp = providerRecordSchema.safeParse(e.record);
+        if (!parseResp.success) return;
 
-      allProviders = allProviders.filter((x) => parseResp.data?.id !== x.id);
-      allProviders.push(parseResp.data);
-    }
-    if (e.action === "delete") {
-      const parseResp = providerRecordSchema.safeParse(e.record);
-      if (!parseResp.success) return;
+        allProviders = allProviders.filter((x) => parseResp.data?.id !== x.id);
+        allProviders.push(parseResp.data);
+      }
+      if (e.action === "delete") {
+        const parseResp = providerRecordSchema.safeParse(e.record);
+        if (!parseResp.success) return;
 
-      allProviders = allProviders.filter((x) => parseResp.data?.id !== x.id);
-    }
-    p.onChange(allProviders);
-  });
+        allProviders = allProviders.filter((x) => parseResp.data?.id !== x.id);
+      }
+      p.onChange(allProviders);
+    });
 
-  return { success: true, data: unsub } as const;
+    return { success: true, data: unsub } as const;
+  } catch (error) {
+    p.onError();
+    return { success: false, error } as const;
+  }
 };
 
 export const createProviderRecord = async (p: {
@@ -70,7 +79,7 @@ export const createProviderRecord = async (p: {
   >;
 }) => {
   try {
-    const resp = await p.pb.collection("providers").create(p.data);
+    const resp = await p.pb.collection("aiProviders").create(p.data);
     return { success: true, data: resp } as const;
   } catch (error) {
     console.error(error);
@@ -83,7 +92,7 @@ export const updateProviderRecord = async (p: {
   data: Omit<TProviderRecord, "collectionId" | "collectionName" | "created" | "updated">;
 }) => {
   try {
-    const resp = await p.pb.collection("providers").update(p.data.id, p.data);
+    const resp = await p.pb.collection("aiProviders").update(p.data.id, p.data);
     return { success: true, data: resp } as const;
   } catch (error) {
     console.error(error);

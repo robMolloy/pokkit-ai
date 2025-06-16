@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { TProviderRecord } from "./dbProviderRecordsUtils";
 
-type TState = TProviderRecord[] | undefined;
+type TState = TProviderRecord[] | undefined | null;
 
 const useInitProviderRecordsStore = create<{
   data: TState;

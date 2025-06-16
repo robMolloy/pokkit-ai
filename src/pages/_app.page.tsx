@@ -56,7 +56,11 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (currentUserStore.data.status === "loggedIn") {
       smartSubscribeToUsers({ pb, onChange: (x) => usersStore.setData(x) });
-      smartSubscribeToProviderRecords({ pb, onChange: (x) => providerRecordsStore.setData(x) });
+      smartSubscribeToProviderRecords({
+        pb,
+        onChange: (x) => providerRecordsStore.setData(x),
+        onError: () => providerRecordsStore.setData(null),
+      });
     } else {
       usersStore.clear();
       providerRecordsStore.clear();
