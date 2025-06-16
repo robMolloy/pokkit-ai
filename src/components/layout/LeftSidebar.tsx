@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { pb } from "@/config/pocketbaseConfig";
 import { logout } from "@/modules/auth/dbAuthUtils";
 import { useUsersStore } from "@/modules/users/usersStore";
-import { useAnthropicStore } from "@/stores/anthropicStore";
+import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { useCurrentUserStore } from "@/stores/authDataStore";
 import Link from "next/link";
 import { useRouter } from "next/router";

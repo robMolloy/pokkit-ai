@@ -10,10 +10,9 @@ const providerRecordSchema = z.object({
   created: z.string(),
   updated: z.string(),
 });
-
 export type TProviderRecord = z.infer<typeof providerRecordSchema>;
 
-export const listProviders = async (p: { pb: PocketBase }) => {
+export const listProviderRecords = async (p: { pb: PocketBase }) => {
   try {
     const initData = await p.pb.collection("providers").getFullList({
       sort: "-created",
@@ -29,11 +28,11 @@ export const listProviders = async (p: { pb: PocketBase }) => {
   }
 };
 
-export const smartSubscribeToProviders = async (p: {
+export const smartSubscribeToProviderRecords = async (p: {
   pb: PocketBase;
   onChange: (x: TProviderRecord[]) => void;
 }) => {
-  const listProvidersResp = await listProviders(p);
+  const listProvidersResp = await listProviderRecords(p);
   if (!listProvidersResp.success) return listProvidersResp;
 
   let allProviders = listProvidersResp.data;
@@ -63,7 +62,7 @@ export const smartSubscribeToProviders = async (p: {
   return { success: true, data: unsub } as const;
 };
 
-export const createProvider = async (p: {
+export const createProviderRecord = async (p: {
   pb: PocketBase;
   data: Omit<
     TProviderRecord,
@@ -79,7 +78,7 @@ export const createProvider = async (p: {
   }
 };
 
-export const updateProvider = async (p: {
+export const updateProviderRecord = async (p: {
   pb: PocketBase;
   data: Omit<TProviderRecord, "collectionId" | "collectionName" | "created" | "updated">;
 }) => {

@@ -1,12 +1,12 @@
 import { Layout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
 import { AuthForm } from "@/modules/auth/AuthForm";
-import { smartSubscribeToProviders } from "@/modules/providers/dbProvidersUtils";
+import { smartSubscribeToProviderRecords } from "@/modules/providers/dbProviderRecordsUtils";
 import { useProviderRecordsStore } from "@/modules/providers/providerRecordsStore";
 import { smartSubscribeToUsers, subscribeToUser } from "@/modules/users/dbUsersUtils";
 import { useUsersStore } from "@/modules/users/usersStore";
 import { LoadingScreen } from "@/screens/LoadingScreen";
-import { useAnthropicStoreSync } from "@/stores/anthropicStore";
+import { useAnthropicStoreSync } from "@/modules/providers/anthropicStore";
 import {
   useCurrentUserStore,
   useUnverifiedIsLoggedInStore,
@@ -56,7 +56,7 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (currentUserStore.data.status === "loggedIn") {
       smartSubscribeToUsers({ pb, onChange: (x) => usersStore.setData(x) });
-      smartSubscribeToProviders({ pb, onChange: (x) => providerRecordsStore.setData(x) });
+      smartSubscribeToProviderRecords({ pb, onChange: (x) => providerRecordsStore.setData(x) });
     } else {
       usersStore.clear();
       providerRecordsStore.clear();

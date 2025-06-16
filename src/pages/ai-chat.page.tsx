@@ -2,14 +2,14 @@ import { CustomIcon } from "@/components/CustomIcon";
 import { MainLayout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { TChatMessage } from "@/modules/aiChat/anthropicApi";
+import { TChatMessage } from "@/modules/providers/anthropicApi";
 import { AiChatForm } from "@/modules/aiChat/components/AiChatForm";
 import {
   AssistantMessage,
   DisplayChatMessages,
   ErrorMessage,
 } from "@/modules/aiChat/components/Messages";
-import { useAnthropicStore } from "@/stores/anthropicStore";
+import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { useEffect, useRef, useState } from "react";
 
 const ScrollContainer = (p: { children: React.ReactNode; className?: string }) => {

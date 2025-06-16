@@ -1,6 +1,6 @@
 import { CustomIcon } from "@/components/CustomIcon";
 import { Card, CardContent } from "@/components/ui/card";
-import { TChatMessage } from "@/modules/aiChat/anthropicApi";
+import { TChatMessage } from "@/modules/providers/anthropicApi";
 import React from "react";
 import Markdown from "react-markdown";
 

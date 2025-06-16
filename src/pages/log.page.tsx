@@ -2,7 +2,7 @@ import { useProviderRecordsStore } from "@/modules/providers/providerRecordsStor
 import { useUsersStore } from "@/modules/users/usersStore";
 import { useCurrentUserStore, useUnverifiedIsLoggedInStore } from "@/stores/authDataStore";
 
-export default () => {
+const LogPage = () => {
   const usersStore = useUsersStore();
   const currentUserStore = useCurrentUserStore();
   const unverifiedIsLoggedInStore = useUnverifiedIsLoggedInStore();
@@ -20,3 +20,5 @@ export default () => {
     </div>
   );
 };
+
+export default LogPage;

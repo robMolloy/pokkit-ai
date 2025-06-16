@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { TProviderRecord } from "./dbProvidersUtils";
+import { TProviderRecord } from "./dbProviderRecordsUtils";
 
 type TState = TProviderRecord[] | undefined;
 

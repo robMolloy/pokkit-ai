@@ -1,4 +1,4 @@
-import { callAnthropic } from "@/modules/aiChat/anthropicApi";
+import { testAnthropicInstance } from "@/modules/providers/anthropicApi";
 import { useProviderRecordsStore } from "@/modules/providers/providerRecordsStore";
 import Anthropic from "@anthropic-ai/sdk";
 import { useEffect } from "react";
@@ -24,6 +24,7 @@ export const useAnthropicStore = () => {
 
 export const useAnthropicStoreSync = () => {
   const initAnthropicStore = useInitAnthropicStore();
+
   const providerRecordsStore = useProviderRecordsStore();
   const anthropicRecord = providerRecordsStore.anthropic;
 
@@ -38,12 +39,7 @@ export const useAnthropicStoreSync = () => {
     });
 
     (async () => {
-      const resp = await callAnthropic({
-        anthropic,
-        messages: [{ role: "user", content: [{ type: "text", text: "Hello, world!" }] }],
-        onStreamStatusChange: () => {},
-        onStreamChange: () => {},
-      });
+      const resp = await testAnthropicInstance({ anthropic });
 
       initAnthropicStore.setData(resp.success ? anthropic : null);
     })();

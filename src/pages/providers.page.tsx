@@ -4,15 +4,18 @@ import { H1 } from "@/components/ui/defaultComponents";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { pb } from "@/config/pocketbaseConfig";
-import { createProvider, updateProvider } from "@/modules/providers/dbProvidersUtils";
+import {
+  createProviderRecord,
+  updateProviderRecord,
+} from "@/modules/providers/dbProviderRecordsUtils";
 import { LoadingScreen } from "@/screens/LoadingScreen";
-import { useAnthropicStore } from "@/stores/anthropicStore";
+import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { debounce } from "lodash";
 import { useState } from "react";
 import { useProviderRecordsStore } from "../modules/providers/providerRecordsStore";
 
 const debouncedUpdate = debounce(
-  (p: Parameters<typeof updateProvider>[0]) => updateProvider(p),
+  (p: Parameters<typeof updateProviderRecord>[0]) => updateProviderRecord(p),
   1000,
 );
 
@@ -72,19 +75,14 @@ const ProvidersScreen = () => {
               <Input
                 value={anthropicApiKey}
                 onChange={async (e) => {
-                  setAnthropicApiKey(e.target.value);
+                  const apiKey = e.target.value;
+                  setAnthropicApiKey(apiKey);
 
                   anthropicStore.setData(undefined);
 
-                  anthropic
-                    ? debouncedUpdate({
-                        pb,
-                        data: { ...anthropic, apiKey: e.target.value },
-                      })
-                    : createProvider({
-                        pb,
-                        data: { provider: "anthropic", apiKey: e.target.value },
-                      });
+                  if (anthropic) return debouncedUpdate({ pb, data: { ...anthropic, apiKey } });
+
+                  createProviderRecord({ pb, data: { provider: "anthropic", apiKey } });
                 }}
               />
               {anthropicStore.data && (

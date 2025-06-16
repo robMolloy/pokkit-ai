@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { chatMessageContentItemSchema } from "./anthropicApi";
+import { chatMessageContentItemSchema } from "@/modules/providers/anthropicApi";
 
 export const convertFileToBase64 = async (file: File) => {
   const resp = await new Promise<string>((resolve, reject) => {

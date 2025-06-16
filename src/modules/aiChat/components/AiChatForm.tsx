@@ -4,7 +4,7 @@ import {
   createAssistantMessage,
   createUserMessage,
   TChatMessage,
-} from "../anthropicApi";
+} from "@/modules/providers/anthropicApi";
 import { convertFilesToFileDetails } from "../utils";
 import { AiInputTextAndMedia } from "./AiInputTextAndImages";
 import Anthropic from "@anthropic-ai/sdk";
