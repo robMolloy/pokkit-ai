@@ -109,7 +109,6 @@ const ProvidersPage = () => {
 
   return (
     <MainLayout>
-      <pre>{JSON.stringify(providersStore, undefined, 2)}</pre>
       {providersStore.data === undefined && <LoadingScreen />}
       {providersStore.data !== undefined && <ProvidersScreen />}
     </MainLayout>
