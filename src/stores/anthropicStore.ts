@@ -1,5 +1,5 @@
 import { callAnthropic } from "@/modules/aiChat/anthropicApi";
-import { useSettingsStore } from "@/modules/settings/settingsStore";
+import { useProvidersStore } from "@/modules/providers/providersStore";
 import Anthropic from "@anthropic-ai/sdk";
 import { useEffect } from "react";
 import { create } from "zustand";
@@ -23,9 +23,9 @@ export const useAnthropicStore = () => {
 };
 
 export const useAnthropicStoreSync = () => {
-  const settingsStore = useSettingsStore();
+  const settingsStore = useProvidersStore();
 
-  const anthropicSetting = settingsStore.anthropicSetting.get();
+  const anthropicSetting = settingsStore.anthropic;
   const initAnthropicStore = useInitAnthropicStore();
   useEffect(() => {
     if (!anthropicSetting?.apiKey) return initAnthropicStore.setData(null);

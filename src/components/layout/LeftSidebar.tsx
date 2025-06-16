@@ -95,11 +95,11 @@ export function LeftSidebar() {
           {currentUserStore.data.status === "loggedIn" &&
             currentUserStore.data.user.status === "admin" && (
               <SidebarButton
-                href="/settings"
-                iconName="settings"
-                isHighlighted={router.pathname === "/settings"}
+                href="/providers"
+                iconName="brain"
+                isHighlighted={router.pathname === "/providers"}
               >
-                Settings
+                Providers
               </SidebarButton>
             )}
           <SidebarButton iconName="logOut" isHighlighted={false} onClick={() => logout({ pb })}>

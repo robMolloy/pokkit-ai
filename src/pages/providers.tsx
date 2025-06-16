@@ -4,18 +4,17 @@ import { H1 } from "@/components/ui/defaultComponents";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { pb } from "@/config/pocketbaseConfig";
-import { createSetting, updateSetting } from "@/modules/settings/dbSettingsUtils";
+import { createProvider, updateProvider } from "@/modules/providers/dbProvidersUtils";
 import { LoadingScreen } from "@/screens/LoadingScreen";
 import { useAnthropicStore } from "@/stores/anthropicStore";
 import { debounce } from "lodash";
 import { useState } from "react";
-import { useSettingsStore } from "../modules/settings/settingsStore";
+import { useProvidersStore } from "../modules/providers/providersStore";
 
 const debouncedUpdate = debounce(
-  (p: Parameters<typeof updateSetting>[0]) => updateSetting(p),
+  (p: Parameters<typeof updateProvider>[0]) => updateProvider(p),
   1000,
 );
-// const debouncedUpdate = debounce((data: TSettingsRecord) => updateSetting({ pb, data }), 1000);
 
 export const SettingItem = (p: {
   title: string;
@@ -51,18 +50,18 @@ export const SettingItem = (p: {
   return content;
 };
 
-const SettingsScreen = () => {
-  const settingsStore = useSettingsStore();
+const ProvidersScreen = () => {
+  const providersStore = useProvidersStore();
 
-  const anthropicSetting = settingsStore.data?.find((x) => x.provider === "anthropic");
+  const anthropic = providersStore.anthropic;
 
   const anthropicStore = useAnthropicStore();
 
-  const [anthropicApiKey, setAnthropicApiKey] = useState(anthropicSetting?.apiKey ?? "");
+  const [anthropicApiKey, setAnthropicApiKey] = useState(anthropic?.apiKey ?? "");
 
   return (
     <>
-      <H1>Settings</H1>
+      <H1>Providers</H1>
 
       <br />
 
@@ -77,12 +76,12 @@ const SettingsScreen = () => {
 
                   anthropicStore.setData(undefined);
 
-                  anthropicSetting
+                  anthropic
                     ? debouncedUpdate({
                         pb,
-                        data: { ...anthropicSetting, apiKey: e.target.value },
+                        data: { ...anthropic, apiKey: e.target.value },
                       })
-                    : createSetting({
+                    : createProvider({
                         pb,
                         data: { provider: "anthropic", apiKey: e.target.value },
                       });
@@ -105,15 +104,16 @@ const SettingsScreen = () => {
   );
 };
 
-const SettingsPage = () => {
-  const settingsStore = useSettingsStore();
+const ProvidersPage = () => {
+  const providersStore = useProvidersStore();
 
   return (
     <MainLayout>
-      {settingsStore.data === undefined && <LoadingScreen />}
-      {settingsStore.data !== undefined && <SettingsScreen />}
+      <pre>{JSON.stringify(providersStore, undefined, 2)}</pre>
+      {providersStore.data === undefined && <LoadingScreen />}
+      {providersStore.data !== undefined && <ProvidersScreen />}
     </MainLayout>
   );
 };
 
-export default SettingsPage;
+export default ProvidersPage;
