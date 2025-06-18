@@ -1,3 +1,4 @@
+import { uuid } from "@/lib/utils";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
@@ -32,29 +33,25 @@ export const chatMessageContentItemSchema = z.union([
   chatMessageContentImageSchema,
   chatMessageContentDocSchema,
 ]);
-export type TChatMessageContentItem = z.infer<typeof chatMessageContentItemSchema>;
-export type TChatMessageContent = TChatMessageContentItem[];
-export type TChatMessage = { id: string; role: "user" | "assistant"; content: TChatMessageContent };
-
-const uuid = () => crypto.randomUUID();
-
-export const createAssistantMessage = (text: string): TChatMessage => {
-  return { id: uuid(), role: "assistant", content: [{ type: "text", text }] };
+export type TAnthropicMessageContentItem = z.infer<typeof chatMessageContentItemSchema>;
+export type TAnthropicMessageContent = TAnthropicMessageContentItem[];
+export type TAnthropicMessageRole = "user" | "assistant";
+export type TAnthropicMessage = {
+  id: string;
+  role: TAnthropicMessageRole;
+  content: TAnthropicMessageContent;
 };
 
-export const createMessageContentItem = (
-  item: TChatMessageContentItem,
-): TChatMessageContentItem => {
-  return item;
-};
-
-export const createUserMessage = (content: TChatMessageContent): TChatMessage => {
-  return { id: uuid(), role: "user", content };
+export const createAnthropicMessage = (p: {
+  role: TAnthropicMessageRole;
+  content: TAnthropicMessageContent;
+}): TAnthropicMessage => {
+  return { id: uuid(), role: p.role, content: p.content };
 };
 
 export const callAnthropic = async (p: {
   anthropic: Anthropic;
-  messages: Omit<TChatMessage, "id">[];
+  messages: TAnthropicMessage[];
   onStreamStatusChange: (status: "streaming" | "finished" | "error") => void;
   onStreamChange: (text: string) => void;
   model?: "claude-3-5-haiku-20241022" | "claude-3-7-sonnet-20250219";
@@ -67,7 +64,7 @@ export const callAnthropic = async (p: {
     const stream = await p.anthropic.messages.create({
       model,
       max_tokens: 1000,
-      messages: p.messages,
+      messages: p.messages.map((x) => ({ role: x.role, content: x.content })),
       stream: true,
     });
 
@@ -96,7 +93,9 @@ export const callAnthropic = async (p: {
 export const testAnthropicInstance = async (p: { anthropic: Anthropic }) => {
   return callAnthropic({
     anthropic: p.anthropic,
-    messages: [{ role: "user", content: [{ type: "text", text: "Hello, world!" }] }],
+    messages: [
+      createAnthropicMessage({ role: "user", content: [{ type: "text", text: "Hello, world!" }] }),
+    ],
     onStreamStatusChange: () => {},
     onStreamChange: () => {},
   });

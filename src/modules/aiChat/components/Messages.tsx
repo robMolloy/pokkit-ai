@@ -1,6 +1,6 @@
 import { CustomIcon } from "@/components/CustomIcon";
 import { Card, CardContent } from "@/components/ui/card";
-import { TChatMessage } from "@/modules/providers/anthropicApi";
+import { TAnthropicMessage } from "@/modules/providers/anthropicApi";
 import React from "react";
 import Markdown from "react-markdown";
 
@@ -51,7 +51,7 @@ export const ErrorMessage = () => {
   );
 };
 
-export const DisplayChatMessages = React.memo((p: { messages: TChatMessage[] }) => {
+export const DisplayChatMessages = React.memo((p: { messages: TAnthropicMessage[] }) => {
   return (
     <>
       {p.messages.map((x) => {

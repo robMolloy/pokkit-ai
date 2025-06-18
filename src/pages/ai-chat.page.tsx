@@ -2,7 +2,7 @@ import { CustomIcon } from "@/components/CustomIcon";
 import { MainLayout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { TChatMessage } from "@/modules/providers/anthropicApi";
+import { TAnthropicMessage } from "@/modules/providers/anthropicApi";
 import { AiChatForm } from "@/modules/aiChat/components/AiChatForm";
 import {
   AssistantMessage,
@@ -70,7 +70,7 @@ const AiChat = () => {
   const anthropicStore = useAnthropicStore();
   const anthropicInstance = anthropicStore.data;
   const [mode, setMode] = useState<"ready" | "thinking" | "streaming" | "error">("ready");
-  const [messages, setMessages] = useState<TChatMessage[]>([]);
+  const [messages, setMessages] = useState<TAnthropicMessage[]>([]);
   const [streamedResponse, setStreamedResponse] = useState("");
 
   return (
