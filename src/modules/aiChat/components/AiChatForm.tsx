@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   callAnthropic,
-  // createAssistantMessage,
-  // createUserMessage,
   createAnthropicMessage,
   TAnthropicMessage,
 } from "@/modules/providers/anthropicApi";
