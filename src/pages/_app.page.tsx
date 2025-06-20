@@ -1,12 +1,12 @@
 import { Layout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
 import { AuthForm } from "@/modules/auth/AuthForm";
+import { useAnthropicStoreSync } from "@/modules/providers/anthropicStore";
 import { smartSubscribeToProviderRecords } from "@/modules/providers/dbProviderRecordsUtils";
 import { useProviderRecordsStore } from "@/modules/providers/providerRecordsStore";
 import { smartSubscribeToUsers, subscribeToUser } from "@/modules/users/dbUsersUtils";
 import { useUsersStore } from "@/modules/users/usersStore";
 import { LoadingScreen } from "@/screens/LoadingScreen";
-import { useAnthropicStoreSync } from "@/modules/providers/anthropicStore";
 import {
   useCurrentUserStore,
   useUnverifiedIsLoggedInStore,
@@ -18,16 +18,16 @@ import "@/styles/markdown.css";
 import type { AppProps } from "next/app";
 import { useEffect } from "react";
 
-export default function App({ Component, pageProps }: AppProps) {
-  const themeStore = useThemeStore();
+const useAuth = (p: {
+  onIsLoading: () => void;
+  onIsLoggedIn: () => void;
+  onIsLoggedOut: () => void;
+}) => {
   const unverifiedIsLoggedInStore = useUnverifiedIsLoggedInStore();
-  const usersStore = useUsersStore();
-  const providerRecordsStore = useProviderRecordsStore();
+
   const currentUserStore = useCurrentUserStore();
 
-  themeStore.useThemeStoreSideEffect();
   useUnverifiedIsLoggedInSync({ pb });
-  useAnthropicStoreSync();
 
   useEffect(() => {
     // use anfn as return value is not cleanup
@@ -54,18 +54,77 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [unverifiedIsLoggedInStore.data]);
 
   useEffect(() => {
-    if (currentUserStore.data.status === "loggedIn") {
+    if (currentUserStore.data.status === "loading") return p.onIsLoading();
+    if (currentUserStore.data.status === "loggedIn") return p.onIsLoggedIn();
+    if (currentUserStore.data.status === "loggedOut") return p.onIsLoggedOut();
+
+    console.error("should never be hit");
+  }, [currentUserStore.data]);
+
+  return currentUserStore.data;
+};
+
+export default function App({ Component, pageProps }: AppProps) {
+  const themeStore = useThemeStore();
+  // const unverifiedIsLoggedInStore = useUnverifiedIsLoggedInStore();
+  const usersStore = useUsersStore();
+  const providerRecordsStore = useProviderRecordsStore();
+  const currentUserStore = useCurrentUserStore();
+
+  themeStore.useThemeStoreSideEffect();
+  // useUnverifiedIsLoggedInSync({ pb });
+  useAnthropicStoreSync();
+
+  // useEffect(() => {
+  //   // use anfn as return value is not cleanup
+  //   (() => {
+  //     if (unverifiedIsLoggedInStore.data.status === "loggedOut")
+  //       return currentUserStore.setData({ status: "loggedOut" });
+
+  //     if (unverifiedIsLoggedInStore.data.status === "loading")
+  //       return currentUserStore.setData({ status: "loading" });
+
+  //     if (unverifiedIsLoggedInStore.data.status !== "loggedIn")
+  //       return console.error("should never be hit");
+
+  //     return subscribeToUser({
+  //       pb,
+
+  //       id: unverifiedIsLoggedInStore.data.auth.record.id,
+  //       onChange: (user) => {
+  //         if (user) currentUserStore.setData({ status: "loggedIn", user });
+  //         else currentUserStore.setData({ status: "loggedOut" });
+  //       },
+  //     });
+  //   })();
+  // }, [unverifiedIsLoggedInStore.data]);
+
+  // useEffect(() => {
+  //   if (currentUserStore.data.status === "loggedIn") {
+  //     smartSubscribeToUsers({ pb, onChange: (x) => usersStore.setData(x) });
+  //     smartSubscribeToProviderRecords({
+  //       pb,
+  //       onChange: (x) => providerRecordsStore.setData(x),
+  //       onError: () => providerRecordsStore.setData(null),
+  //     });
+  //   } else {
+  //     usersStore.clear();
+  //     providerRecordsStore.clear();
+  //   }
+  // }, [currentUserStore.data]);
+
+  useAuth({
+    onIsLoading: () => {},
+    onIsLoggedIn: () => {
       smartSubscribeToUsers({ pb, onChange: (x) => usersStore.setData(x) });
       smartSubscribeToProviderRecords({
         pb,
         onChange: (x) => providerRecordsStore.setData(x),
         onError: () => providerRecordsStore.setData(null),
       });
-    } else {
-      usersStore.clear();
-      providerRecordsStore.clear();
-    }
-  }, [currentUserStore.data]);
+    },
+    onIsLoggedOut: () => {},
+  });
 
   return (
     <>

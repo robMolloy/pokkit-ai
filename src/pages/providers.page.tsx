@@ -62,9 +62,13 @@ const ProvidersScreen = () => {
 
   const [anthropicApiKey, setAnthropicApiKey] = useState(anthropic?.apiKey ?? "");
 
+  if (providersStore.data === undefined) return <LoadingScreen />;
+
   return (
     <>
       <H1>Providers</H1>
+
+      <pre>{JSON.stringify(providersStore.data, undefined, 2)}</pre>
 
       <br />
 

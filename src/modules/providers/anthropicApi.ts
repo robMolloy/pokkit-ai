@@ -2,16 +2,15 @@ import { uuid } from "@/lib/utils";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
-export const chatMessageContentTextSchema = z.object({ type: z.literal("text"), text: z.string() });
+export const anthropicMessageContentTextSchema = z.object({
+  type: z.literal("text"),
+  text: z.string(),
+});
 
-export const imageMediaTypeSchema = z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]);
-export const docMediaTypeSchema = z.literal("application/pdf");
-export const mediaTypeSchema = z.union([imageMediaTypeSchema, docMediaTypeSchema]);
-export type TMediaType = z.infer<typeof mediaTypeSchema>;
+const imageMediaTypeSchema = z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+const docMediaTypeSchema = z.literal("application/pdf");
 
-type TStreamStatus = "streaming" | "finished" | "error";
-
-export const chatMessageContentImageSchema = z.object({
+export const anthropicMessageContentImageSchema = z.object({
   type: z.literal("image"),
   source: z.object({
     type: z.literal("base64"),
@@ -19,7 +18,7 @@ export const chatMessageContentImageSchema = z.object({
     data: z.string(),
   }),
 });
-export const chatMessageContentDocSchema = z.object({
+export const anthropicMessageContentDocSchema = z.object({
   type: z.literal("document"),
   source: z.object({
     type: z.literal("base64"),
@@ -28,36 +27,37 @@ export const chatMessageContentDocSchema = z.object({
   }),
 });
 
-export const chatMessageContentItemSchema = z.union([
-  chatMessageContentTextSchema,
-  chatMessageContentImageSchema,
-  chatMessageContentDocSchema,
+export const anthropicMessageContentItemSchema = z.union([
+  anthropicMessageContentTextSchema,
+  anthropicMessageContentImageSchema,
+  anthropicMessageContentDocSchema,
 ]);
-export type TAnthropicMessageContentItem = z.infer<typeof chatMessageContentItemSchema>;
-export type TAnthropicMessageContent = TAnthropicMessageContentItem[];
+export type TAnthropicMessageContentItem = z.infer<typeof anthropicMessageContentItemSchema>;
 export type TAnthropicMessageRole = "user" | "assistant";
 export type TAnthropicMessage = {
   id: string;
   role: TAnthropicMessageRole;
-  content: TAnthropicMessageContent;
+  content: TAnthropicMessageContentItem[];
 };
 
 export const createAnthropicMessage = (p: {
   role: TAnthropicMessageRole;
-  content: TAnthropicMessageContent;
+  content: TAnthropicMessageContentItem[];
 }): TAnthropicMessage => {
   return { id: uuid(), role: p.role, content: p.content };
 };
 
+type TStreamStatus = "streaming" | "finished" | "error";
 export const callAnthropic = async (p: {
   anthropic: Anthropic;
   messages: TAnthropicMessage[];
-  onStreamStatusChange: (status: "streaming" | "finished" | "error") => void;
+  onStreamStatusChange: (status: TStreamStatus) => void;
   onStreamChange: (text: string) => void;
   model?: "claude-3-5-haiku-20241022" | "claude-3-7-sonnet-20250219";
 }) => {
   const model = p.model ?? "claude-3-5-haiku-20241022";
-  let streamStatus: TStreamStatus = "streaming";
+
+  let streamStatus: undefined | TStreamStatus = undefined;
   let fullResponse = "";
 
   try {
@@ -91,7 +91,7 @@ export const callAnthropic = async (p: {
 };
 
 export const testAnthropicInstance = async (p: { anthropic: Anthropic }) => {
-  return callAnthropic({
+  const rtn = await callAnthropic({
     anthropic: p.anthropic,
     messages: [
       createAnthropicMessage({ role: "user", content: [{ type: "text", text: "Hello, world!" }] }),
@@ -99,4 +99,8 @@ export const testAnthropicInstance = async (p: { anthropic: Anthropic }) => {
     onStreamStatusChange: () => {},
     onStreamChange: () => {},
   });
+
+  console.log(`anthropicApi.ts:${/*LL*/ 102}`, { rtn });
+
+  return rtn;
 };

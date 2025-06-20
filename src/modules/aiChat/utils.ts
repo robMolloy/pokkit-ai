@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { chatMessageContentItemSchema } from "@/modules/providers/anthropicApi";
+import { anthropicMessageContentItemSchema } from "@/modules/providers/anthropicApi";
 
 export const convertFileToBase64 = async (file: File) => {
   const resp = await new Promise<string>((resolve, reject) => {
@@ -21,7 +21,7 @@ export const convertFileToChatMessageContentFromFile = async (file: File) => {
   const type = media_type === "application/pdf" ? "document" : media_type.split("/")[0];
   const payload = { type, source: { type: "base64", media_type, data: base64Resp.data } };
 
-  return chatMessageContentItemSchema.safeParse(payload);
+  return anthropicMessageContentItemSchema.safeParse(payload);
 };
 
 export const convertFilesToFileDetails = async (files: File[]) => {
