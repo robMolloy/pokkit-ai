@@ -11,6 +11,7 @@ import Anthropic from "@anthropic-ai/sdk";
 export const AiChatForm = (p: {
   anthropic: Anthropic;
   messages: TAnthropicMessage[];
+  onSubmitMessage: (message: string) => void;
   onUpdatedMessages: (messages: TAnthropicMessage[]) => void;
   onModeChange: (mode: "ready" | "thinking" | "streaming" | "error") => void;
   onStream: (text: string) => void;
@@ -26,6 +27,8 @@ export const AiChatForm = (p: {
     e.preventDefault();
     if (mode === "thinking" || mode === "streaming") return;
     setMode("thinking");
+
+    p.onSubmitMessage(currentInput);
 
     const newUserMessage = createAnthropicMessage({
       role: "user",

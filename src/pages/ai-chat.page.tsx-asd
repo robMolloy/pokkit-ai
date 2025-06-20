@@ -11,6 +11,7 @@ import {
 } from "@/modules/aiChat/components/Messages";
 import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { useEffect, useRef, useState } from "react";
+import { pb } from "@/config/pocketbaseConfig";
 
 const ScrollContainer = (p: { children: React.ReactNode; className?: string }) => {
   const [isAtBottom, setIsAtBottom] = useState(false);
@@ -93,6 +94,18 @@ const AiChat = () => {
             <AiChatForm
               anthropic={anthropicInstance}
               messages={messages}
+              onSubmitMessage={async () => {
+                const resp = await createAiThreadRecord({
+                  pb,
+                  data: {
+                    collectionId: "aiThreads",
+                    collectionName: "aiThreads",
+                    id: uuid(),
+                    threadId,
+                    title: "New Thread",
+                  },
+                });
+              }}
               onModeChange={setMode}
               onUpdatedMessages={setMessages}
               onStream={(text) => setStreamedResponse(text)}
