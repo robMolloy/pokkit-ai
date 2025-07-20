@@ -11,6 +11,7 @@ import { CustomIcon } from "../CustomIcon";
 import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { Tooltip } from "@radix-ui/react-tooltip";
+import { MainLayout } from "./Layout";
 
 const uuid = () => crypto.randomUUID();
 
@@ -92,68 +93,73 @@ export function LeftSidebar() {
 
   const anthropicStore = useAnthropicStore();
   return (
-    <div className={"flex h-full flex-col"}>
-      <div className="flex-1 overflow-y-auto p-2">
-        <div className="flex flex-col gap-1">
-          <SidebarButton href="/" iconName={"Home"} isHighlighted={router.pathname === "/"}>
-            Home
-          </SidebarButton>
+    <MainLayout fillPageExactly padding={false}>
+      <div className="flex h-full flex-col">
+        <div className="border-b p-2">
+          <div className="flex flex-col gap-1">
+            <SidebarButton href="/" iconName={"Home"} isHighlighted={router.pathname === "/"}>
+              Home
+            </SidebarButton>
 
-          <SidebarButton
-            disabled={!anthropicStore.data}
-            iconName="Brain"
-            isHighlighted={!currentThread && !!threadId}
-            onClick={() => router.push(`/ai-chat/${uuid()}`)}
-          >
-            AI Chat
-          </SidebarButton>
+            <SidebarButton
+              disabled={!anthropicStore.data}
+              iconName="Brain"
+              isHighlighted={!currentThread && !!threadId}
+              onClick={() => router.push(`/ai-chat/${uuid()}`)}
+            >
+              AI Chat
+            </SidebarButton>
+          </div>
+        </div>
+        <div className="relative flex-1">
+          <div className="absolute inset-0 overflow-y-auto p-2">
+            {aiThreadRecordsStore.data
+              ?.sort((a, b) => (a.updated < b.updated ? 1 : -1))
+              .map((x) => (
+                <SidebarButton
+                  key={x.threadId}
+                  disabled={!anthropicStore.data}
+                  isHighlighted={x.threadId === threadId}
+                  onClick={() => router.push(`/ai-chat/${x.threadId}`)}
+                  tooltipContent={x.threadId}
+                >
+                  <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                    {x.threadId}
+                  </div>
+                </SidebarButton>
+              ))}
+          </div>
+        </div>
 
-          {aiThreadRecordsStore.data
-            ?.sort((a, b) => (a.updated < b.updated ? 1 : -1))
-            .map((x) => (
-              <SidebarButton
-                key={x.threadId}
-                disabled={!anthropicStore.data}
-                isHighlighted={x.threadId === threadId}
-                onClick={() => router.push(`/ai-chat/${x.threadId}`)}
-                tooltipContent={x.threadId}
-              >
-                <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                  {x.threadId}
-                </div>
-              </SidebarButton>
-            ))}
+        <div className="border-t p-2">
+          <div className="flex flex-col gap-1">
+            {currentUserStore.data.status === "loggedIn" &&
+              currentUserStore.data.user.status === "admin" && (
+                <SidebarButton
+                  href="/users"
+                  iconName="Users"
+                  isHighlighted={router.pathname === "/users"}
+                  badgeCount={pendingUsersCount}
+                >
+                  Users
+                </SidebarButton>
+              )}
+            {currentUserStore.data.status === "loggedIn" &&
+              currentUserStore.data.user.status === "admin" && (
+                <SidebarButton
+                  href="/providers"
+                  isHighlighted={router.pathname === "/providers"}
+                  iconName="Brain"
+                >
+                  Providers
+                </SidebarButton>
+              )}
+            <SidebarButton iconName="LogOut" isHighlighted={false} onClick={() => logout({ pb })}>
+              Log Out
+            </SidebarButton>
+          </div>
         </div>
       </div>
-
-      <div className="border-t p-2">
-        <div className="flex flex-col gap-1">
-          {currentUserStore.data.status === "loggedIn" &&
-            currentUserStore.data.user.status === "admin" && (
-              <SidebarButton
-                href="/users"
-                iconName="Users"
-                isHighlighted={router.pathname === "/users"}
-                badgeCount={pendingUsersCount}
-              >
-                Users
-              </SidebarButton>
-            )}
-          {currentUserStore.data.status === "loggedIn" &&
-            currentUserStore.data.user.status === "admin" && (
-              <SidebarButton
-                href="/providers"
-                isHighlighted={router.pathname === "/providers"}
-                iconName="Brain"
-              >
-                Providers
-              </SidebarButton>
-            )}
-          <SidebarButton iconName="LogOut" isHighlighted={false} onClick={() => logout({ pb })}>
-            Log Out
-          </SidebarButton>
-        </div>
-      </div>
-    </div>
+    </MainLayout>
   );
 }
