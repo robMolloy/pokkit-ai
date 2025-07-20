@@ -71,10 +71,6 @@ const ProvidersScreen = () => {
     <>
       <H1>Providers</H1>
 
-      <pre>{JSON.stringify(providersStore.data, undefined, 2)}</pre>
-
-      <br />
-
       <div>
         <SettingItem title="Anthropic API Key" description="API key for Anthropic">
           <div className="flex flex-col items-end justify-end gap-2">

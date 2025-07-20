@@ -1,6 +1,6 @@
 import { CustomIcon } from "@/components/CustomIcon";
 import { Card, CardContent } from "@/components/ui/card";
-import { TAnthropicMessage } from "@/modules/providers/anthropicApi";
+import { TAiMessageRecord } from "@/modules/aiMessages/dbAiMessageUtils";
 import React from "react";
 import Markdown from "react-markdown";
 
@@ -51,37 +51,60 @@ export const ErrorMessage = () => {
   );
 };
 
-export const DisplayChatMessages = React.memo((p: { messages: TAnthropicMessage[] }) => {
+export const DisplayChatMessageRecords = React.memo((p: { messages: TAiMessageRecord[] }) => {
   return (
     <>
       {p.messages.map((x) => {
         if (x.role === "assistant")
-          return x.content.map((content, j) => {
-            return (
-              <AssistantMessage key={`${x.id}-${j}`}>
-                {content.type === "text" ? content.text : ""}
-              </AssistantMessage>
-            );
-          });
-
-        const textContent = x.content.filter((x) => x.type === "text");
-        const imageContent = x.content.filter((x) => x.type === "image");
+          return <AssistantMessage key={x.id}>{x.contentText}</AssistantMessage>;
 
         return (
           <React.Fragment key={x.id}>
-            {textContent.map((content, j) => {
-              return <UserMessageText key={`${x.id}-${j}`}>{content.text}</UserMessageText>;
-            })}
-            <div className="flex items-center gap-2 overflow-x-auto pt-2">
+            <UserMessageText key={x.id}>{x.contentText}</UserMessageText>
+            {/* <div className="flex items-center gap-2 overflow-x-auto pt-2">
               {imageContent.map((content, j) => {
                 return (
                   <UserMessageImage key={`${x.id}-${j}`}>{content.source.data}</UserMessageImage>
                 );
               })}
-            </div>
+            </div> */}
           </React.Fragment>
         );
       })}
     </>
   );
 });
+// export const DisplayChatMessages = React.memo((p: { messages: TAnthropicMessage[] }) => {
+//   return (
+//     <>
+//       {p.messages.map((x) => {
+//         if (x.role === "assistant")
+//           return x.content.map((content, j) => {
+//             return (
+//               <AssistantMessage key={`${x.id}-${j}`}>
+//                 {content.type === "text" ? content.text : ""}
+//               </AssistantMessage>
+//             );
+//           });
+
+//         const textContent = x.content.filter((x) => x.type === "text");
+//         const imageContent = x.content.filter((x) => x.type === "image");
+
+//         return (
+//           <React.Fragment key={x.id}>
+//             {textContent.map((content, j) => {
+//               return <UserMessageText key={`${x.id}-${j}`}>{content.text}</UserMessageText>;
+//             })}
+//             <div className="flex items-center gap-2 overflow-x-auto pt-2">
+//               {imageContent.map((content, j) => {
+//                 return (
+//                   <UserMessageImage key={`${x.id}-${j}`}>{content.source.data}</UserMessageImage>
+//                 );
+//               })}
+//             </div>
+//           </React.Fragment>
+//         );
+//       })}
+//     </>
+//   );
+// });

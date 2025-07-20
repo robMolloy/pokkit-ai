@@ -3,7 +3,7 @@ import { pb } from "@/config/pocketbaseConfig";
 import { AiChatForm } from "@/modules/aiChat/components/AiChatForm";
 import {
   AssistantMessage,
-  DisplayChatMessages,
+  DisplayChatMessageRecords,
   ErrorMessage,
 } from "@/modules/aiChat/components/Messages";
 import { ScrollContainer } from "@/modules/aiChat/components/ScrollContainer";
@@ -41,11 +41,14 @@ export const AiChatScreen = (p: { threadId: string }) => {
     <MainLayout fillPageExactly padding={false}>
       <div className="flex h-full flex-col">
         <ScrollContainer>
-          <pre>{JSON.stringify({ aiMessagesStore, storeMessages }, undefined, 2)}</pre>
+          {/* <pre>{JSON.stringify({ aiMessagesStore, storeMessages }, undefined, 2)}</pre> */}
           <div className="p-4 pb-0">
             <AssistantMessage>Hello! How can I help you today?</AssistantMessage>
-
-            <DisplayChatMessages messages={messages} />
+            {storeMessages && (
+              <DisplayChatMessageRecords
+                messages={storeMessages.sort((a, b) => (a.created < b.created ? -1 : 1))}
+              />
+            )}
 
             {mode === "thinking" && <p>Thinking...</p>}
             {mode === "streaming" && <AssistantMessage>{streamedResponse}</AssistantMessage>}
