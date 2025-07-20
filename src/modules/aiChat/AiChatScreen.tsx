@@ -15,12 +15,18 @@ import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { ErrorScreen } from "@/screens/ErrorScreen";
 import { LoadingScreen } from "@/screens/LoadingScreen";
 import { useState } from "react";
+import { useAiMessageRecordsStore } from "../aiMessages/aiMessageRecordsStore";
 
 export const AiChatScreen = (p: { threadId: string }) => {
   const threadId = p.threadId;
 
   const aiThreadRecordsStore = useAiThreadRecordsStore();
   const currentThread = aiThreadRecordsStore.data?.find((x) => x.threadId === threadId);
+
+  const aiMessagesStore = useAiMessageRecordsStore();
+  const storeMessages = currentThread?.id
+    ? aiMessagesStore.getMessagesByThreadId(currentThread.id)
+    : undefined;
 
   const anthropicStore = useAnthropicStore();
   const anthropicInstance = anthropicStore.data;
@@ -35,6 +41,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
     <MainLayout fillPageExactly padding={false}>
       <div className="flex h-full flex-col">
         <ScrollContainer>
+          <pre>{JSON.stringify({ aiMessagesStore, storeMessages }, undefined, 2)}</pre>
           <div className="p-4 pb-0">
             <AssistantMessage>Hello! How can I help you today?</AssistantMessage>
 

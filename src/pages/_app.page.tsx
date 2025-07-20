@@ -1,5 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
+import { useAiMessageRecordsStore } from "@/modules/aiMessages/aiMessageRecordsStore";
+import { smartSubscribeToAiMessageRecords } from "@/modules/aiMessages/dbAiMessageUtils";
 import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
 import { smartSubscribeToAiThreadRecords } from "@/modules/aiThreads/dbAiThreadRecordUtils";
 import { AuthForm } from "@/modules/auth/AuthForm";
@@ -72,6 +74,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const providerRecordsStore = useProviderRecordsStore();
   const currentUserStore = useCurrentUserStore();
   const aiThreadRecordsStore = useAiThreadRecordsStore();
+  const aiMessageRecordsStore = useAiMessageRecordsStore();
 
   themeStore.useThemeStoreSideEffect();
 
@@ -90,6 +93,11 @@ export default function App({ Component, pageProps }: AppProps) {
         pb,
         onChange: (x) => aiThreadRecordsStore.setData(x),
         onError: () => aiThreadRecordsStore.setData(null),
+      });
+      smartSubscribeToAiMessageRecords({
+        pb,
+        onChange: (x) => aiMessageRecordsStore.setData(x),
+        onError: () => aiMessageRecordsStore.setData(null),
       });
     },
     onIsLoggedOut: () => {},
