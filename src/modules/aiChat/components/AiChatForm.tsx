@@ -15,7 +15,7 @@ export const AiChatForm = (p: {
   onUpdatedMessages: (messages: TAnthropicMessage[]) => void;
   onModeChange: (mode: "ready" | "thinking" | "streaming" | "error") => void;
   onStream: (text: string) => void;
-  onComplete: (messages: TAnthropicMessage[]) => void;
+  onComplete: (p: { messages: TAnthropicMessage[]; newMessageText: string }) => void;
 }) => {
   const [currentInput, setCurrentInput] = useState("");
   const [currentImages, setCurrentImages] = useState<File[]>([]);
@@ -56,13 +56,11 @@ export const AiChatForm = (p: {
       return setMode("error");
     }
 
-    p.onComplete([
-      ...updatedMessages,
-      createAnthropicMessage({
-        role: "assistant",
-        content: [{ type: "text", text: resp.data }],
-      }),
-    ]);
+    const newMessage = createAnthropicMessage({
+      role: "assistant",
+      content: [{ type: "text", text: resp.data }],
+    });
+    p.onComplete({ messages: [...updatedMessages, newMessage], newMessageText: resp.data });
   };
 
   return (

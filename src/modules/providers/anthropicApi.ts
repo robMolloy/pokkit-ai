@@ -55,7 +55,7 @@ export const callAnthropic = async (p: {
   onStreamChange: (text: string) => void;
   model?: "claude-3-5-haiku-20241022" | "claude-3-7-sonnet-20250219";
 }) => {
-  const model = p.model ?? "claude-3-5-haiku-20241022";
+  const model = p.model ?? "claude-3-7-sonnet-20250219";
 
   let streamStatus: undefined | TStreamStatus = undefined;
   let fullResponse = "";
@@ -99,8 +99,6 @@ export const testAnthropicInstance = async (p: { anthropic: Anthropic }) => {
     onStreamStatusChange: () => {},
     onStreamChange: () => {},
   });
-
-  console.log(`anthropicApi.ts:${/*LL*/ 102}`, { rtn });
 
   return rtn;
 };

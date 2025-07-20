@@ -13,6 +13,7 @@ import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { debounce } from "lodash";
 import { useState } from "react";
 import { useProviderRecordsStore } from "../modules/providers/providerRecordsStore";
+import { ErrorScreen } from "@/screens/ErrorScreen";
 
 const debouncedUpdate = debounce(
   (p: Parameters<typeof updateProviderRecord>[0]) => updateProviderRecord(p),
@@ -63,6 +64,8 @@ const ProvidersScreen = () => {
   const [anthropicApiKey, setAnthropicApiKey] = useState(anthropic?.apiKey ?? "");
 
   if (providersStore.data === undefined) return <LoadingScreen />;
+
+  if (providersStore.data === null) return <ErrorScreen />;
 
   return (
     <>

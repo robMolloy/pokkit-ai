@@ -1,5 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
+import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
+import { smartSubscribeToAiThreadRecords } from "@/modules/aiThreads/dbAiThreadRecordUtils";
 import { AuthForm } from "@/modules/auth/AuthForm";
 import { useAnthropicStoreSync } from "@/modules/providers/anthropicStore";
 import { smartSubscribeToProviderRecords } from "@/modules/providers/dbProviderRecordsUtils";
@@ -66,52 +68,14 @@ const useAuth = (p: {
 
 export default function App({ Component, pageProps }: AppProps) {
   const themeStore = useThemeStore();
-  // const unverifiedIsLoggedInStore = useUnverifiedIsLoggedInStore();
   const usersStore = useUsersStore();
   const providerRecordsStore = useProviderRecordsStore();
   const currentUserStore = useCurrentUserStore();
+  const aiThreadRecordsStore = useAiThreadRecordsStore();
 
   themeStore.useThemeStoreSideEffect();
-  // useUnverifiedIsLoggedInSync({ pb });
+
   useAnthropicStoreSync();
-
-  // useEffect(() => {
-  //   // use anfn as return value is not cleanup
-  //   (() => {
-  //     if (unverifiedIsLoggedInStore.data.status === "loggedOut")
-  //       return currentUserStore.setData({ status: "loggedOut" });
-
-  //     if (unverifiedIsLoggedInStore.data.status === "loading")
-  //       return currentUserStore.setData({ status: "loading" });
-
-  //     if (unverifiedIsLoggedInStore.data.status !== "loggedIn")
-  //       return console.error("should never be hit");
-
-  //     return subscribeToUser({
-  //       pb,
-
-  //       id: unverifiedIsLoggedInStore.data.auth.record.id,
-  //       onChange: (user) => {
-  //         if (user) currentUserStore.setData({ status: "loggedIn", user });
-  //         else currentUserStore.setData({ status: "loggedOut" });
-  //       },
-  //     });
-  //   })();
-  // }, [unverifiedIsLoggedInStore.data]);
-
-  // useEffect(() => {
-  //   if (currentUserStore.data.status === "loggedIn") {
-  //     smartSubscribeToUsers({ pb, onChange: (x) => usersStore.setData(x) });
-  //     smartSubscribeToProviderRecords({
-  //       pb,
-  //       onChange: (x) => providerRecordsStore.setData(x),
-  //       onError: () => providerRecordsStore.setData(null),
-  //     });
-  //   } else {
-  //     usersStore.clear();
-  //     providerRecordsStore.clear();
-  //   }
-  // }, [currentUserStore.data]);
 
   useAuth({
     onIsLoading: () => {},
@@ -121,6 +85,11 @@ export default function App({ Component, pageProps }: AppProps) {
         pb,
         onChange: (x) => providerRecordsStore.setData(x),
         onError: () => providerRecordsStore.setData(null),
+      });
+      smartSubscribeToAiThreadRecords({
+        pb,
+        onChange: (x) => aiThreadRecordsStore.setData(x),
+        onError: () => aiThreadRecordsStore.setData(null),
       });
     },
     onIsLoggedOut: () => {},

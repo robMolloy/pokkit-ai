@@ -26,6 +26,7 @@ export const createAiMessageRecord = async (p: {
     return aiMessageRecordSchema.safeParse(resp);
   } catch (error) {
     console.error(error);
+    //
     return { success: false, error } as const;
   }
 };
