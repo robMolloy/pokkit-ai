@@ -31,14 +31,6 @@ export const AiChatScreen = (p: { threadId: string }) => {
   if (aiThreadRecordsStore.data === undefined) return <LoadingScreen />;
   if (aiThreadRecordsStore.data === null) return <ErrorScreen />;
 
-  const getThread = async () =>
-    currentThread
-      ? currentThread
-      : (async () => {
-          const newThreadResp = await createAiThreadRecord({ pb, data: { threadId, title: "" } });
-          if (newThreadResp.success) return newThreadResp.data;
-        })();
-
   return (
     <MainLayout fillPageExactly padding={false}>
       <div className="flex h-full flex-col">
@@ -60,7 +52,13 @@ export const AiChatScreen = (p: { threadId: string }) => {
               anthropic={anthropicInstance}
               messages={messages}
               onSubmitMessage={async (messageText) => {
-                const thread = await getThread();
+                const thread = await (async () => {
+                  if (currentThread) return currentThread;
+
+                  const data = { threadId, title: "" };
+                  const newThreadResp = await createAiThreadRecord({ pb, data });
+                  if (newThreadResp.success) return newThreadResp.data;
+                })();
                 if (!thread) return;
 
                 await createAiMessageRecord({
@@ -83,7 +81,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
                 setMessages(messages);
                 setStreamedResponse("");
 
-                const thread = await getThread();
+                const thread = aiThreadRecordsStore.data?.find((x) => x.threadId === threadId);
                 if (!thread) return;
 
                 await createAiMessageRecord({
