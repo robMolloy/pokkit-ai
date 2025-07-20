@@ -9,6 +9,8 @@ import { useRouter } from "next/router";
 import { ReactNode } from "react";
 import { CustomIcon } from "../CustomIcon";
 import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
+import { TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Tooltip } from "@radix-ui/react-tooltip";
 
 const uuid = () => crypto.randomUUID();
 
@@ -22,6 +24,19 @@ const SidebarButtonWrapper = (p: { children: ReactNode; href?: string; disabled?
   );
 };
 
+const PossibleTooltipWrapper = (p: { children: ReactNode; tooltipContent?: React.ReactNode }) => {
+  return p.tooltipContent ? (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>{p.children}</TooltipTrigger>
+        <TooltipContent>{p.tooltipContent}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : (
+    <>{p.children}</>
+  );
+};
+
 const SidebarButton = (p: {
   href?: string;
   iconName?: React.ComponentProps<typeof CustomIcon>["iconName"];
@@ -30,33 +45,36 @@ const SidebarButton = (p: {
   onClick?: () => void;
   badgeCount?: number;
   disabled?: boolean;
+  tooltipContent?: React.ReactNode;
 }) => {
   return (
     <SidebarButtonWrapper href={p.href} disabled={p.disabled}>
-      <Button
-        variant={p.isHighlighted ? "secondary" : "ghost"}
-        className={`relative w-full justify-start pl-6 ${p.disabled ? "pointer-events-none" : ""}`}
-        onClick={p.onClick}
-        disabled={p.disabled}
-      >
-        {p.iconName && (
-          <span className="mr-2">
-            <CustomIcon
-              iconName={p.iconName}
-              size="sm"
-              className={p.disabled ? "text-muted-foreground" : ""}
-            />
-          </span>
-        )}
+      <PossibleTooltipWrapper tooltipContent={p.tooltipContent}>
+        <Button
+          variant={p.isHighlighted ? "secondary" : "ghost"}
+          className={`relative w-full justify-start pl-6 ${p.disabled ? "pointer-events-none" : ""}`}
+          onClick={p.onClick}
+          disabled={p.disabled}
+        >
+          {p.iconName && (
+            <span className="mr-2">
+              <CustomIcon
+                iconName={p.iconName}
+                size="sm"
+                className={p.disabled ? "text-muted-foreground" : ""}
+              />
+            </span>
+          )}
 
-        {p.children}
+          {p.children}
 
-        {p.badgeCount !== undefined && p.badgeCount > 0 && (
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-destructive px-2 py-0.5 text-xs text-destructive-foreground">
-            {p.badgeCount}
-          </span>
-        )}
-      </Button>
+          {p.badgeCount !== undefined && p.badgeCount > 0 && (
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-destructive px-2 py-0.5 text-xs text-destructive-foreground">
+              {p.badgeCount}
+            </span>
+          )}
+        </Button>
+      </PossibleTooltipWrapper>
     </SidebarButtonWrapper>
   );
 };
@@ -98,6 +116,7 @@ export function LeftSidebar() {
                 disabled={!anthropicStore.data}
                 isHighlighted={x.threadId === threadId}
                 onClick={() => router.push(`/ai-chat/${x.threadId}`)}
+                tooltipContent={x.threadId}
               >
                 <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
                   {x.threadId}
