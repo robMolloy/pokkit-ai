@@ -35,8 +35,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
     currentThread
       ? currentThread
       : (async () => {
-          const data = { threadId, title: "" };
-          const newThreadResp = await createAiThreadRecord({ pb, data });
+          const newThreadResp = await createAiThreadRecord({ pb, data: { threadId, title: "" } });
           if (newThreadResp.success) return newThreadResp.data;
         })();
 
@@ -91,7 +90,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
                   pb,
                   data: {
                     threadId: thread.id,
-                    role: "user",
+                    role: "assistant",
                     contentType: "text",
                     contentText: newMessageText,
                     contentSourceType: "",
