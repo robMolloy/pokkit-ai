@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
 import { CustomIcon } from "../CustomIcon";
+import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
 
 const uuid = () => crypto.randomUUID();
 
@@ -62,7 +63,11 @@ const SidebarButton = (p: {
 
 export function LeftSidebar() {
   const router = useRouter();
+  const aiThreadRecordsStore = useAiThreadRecordsStore();
   const threadId = router.query.threadId as string;
+
+  const currentThread = aiThreadRecordsStore.data?.find((x) => x.threadId === threadId);
+
   const currentUserStore = useCurrentUserStore();
   const usersStore = useUsersStore();
   const pendingUsersCount = usersStore.data.filter((user) => user.status === "pending").length;
@@ -79,22 +84,26 @@ export function LeftSidebar() {
           <SidebarButton
             disabled={!anthropicStore.data}
             iconName="Brain"
-            isHighlighted={false}
+            isHighlighted={!currentThread && !!threadId}
             onClick={() => router.push(`/ai-chat/${uuid()}`)}
           >
             AI Chat
           </SidebarButton>
-          {threadId && (
-            <SidebarButton
-              disabled={!anthropicStore.data}
-              isHighlighted={router.pathname.startsWith("/ai-chat")}
-              onClick={() => router.push(`/ai-chat/${threadId}`)}
-            >
-              <div className="z-100 w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                {threadId}
-              </div>
-            </SidebarButton>
-          )}
+
+          {aiThreadRecordsStore.data
+            ?.sort((a, b) => (a.updated < b.updated ? 1 : -1))
+            .map((x) => (
+              <SidebarButton
+                key={x.threadId}
+                disabled={!anthropicStore.data}
+                isHighlighted={x.threadId === threadId}
+                onClick={() => router.push(`/ai-chat/${x.threadId}`)}
+              >
+                <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                  {x.threadId}
+                </div>
+              </SidebarButton>
+            ))}
         </div>
       </div>
 
