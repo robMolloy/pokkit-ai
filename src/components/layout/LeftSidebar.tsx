@@ -47,10 +47,8 @@ const SidebarButton = (p: {
             />
           </span>
         )}
-        {(() => {
-          if (p.disabled) return <div className="text-muted-foreground">{p.children}</div>;
-          return p.children;
-        })()}
+
+        {p.children}
 
         {p.badgeCount !== undefined && p.badgeCount > 0 && (
           <span className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-destructive px-2 py-0.5 text-xs text-destructive-foreground">
