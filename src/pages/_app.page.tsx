@@ -1,6 +1,9 @@
 import { Layout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
-import { useAiMediaMessageRecordsStore } from "@/modules/aiMediaMessages/aiMediaMessageRecordsStore";
+import {
+  useAiMediaMessageRecordsStore,
+  useCachedFilesStoreWatcher,
+} from "@/modules/aiMediaMessages/aiMediaMessageRecordsStore";
 import { smartSubscribeToAiMediaMessageRecords } from "@/modules/aiMediaMessages/dbAiMediaMessageUtils";
 import { useAiTextMessageRecordsStore } from "@/modules/aiTextMessages/aiTextMessageRecordsStore";
 import { smartSubscribeToAiTextMessageRecords } from "@/modules/aiTextMessages/dbAiTextMessageUtils";
@@ -81,6 +84,7 @@ export default function App({ Component, pageProps }: AppProps) {
   themeStore.useThemeStoreSideEffect();
 
   useAnthropicStoreSync();
+  useCachedFilesStoreWatcher();
 
   useAuth({
     onIsLoading: () => {},

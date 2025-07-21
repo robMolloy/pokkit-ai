@@ -12,7 +12,10 @@ import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { ErrorScreen } from "@/screens/ErrorScreen";
 import { LoadingScreen } from "@/screens/LoadingScreen";
 import React, { useState } from "react";
-import { useAiMediaMessageRecordsStore } from "../aiMediaMessages/aiMediaMessageRecordsStore";
+import {
+  useAiMediaMessageRecordsStore,
+  useCachedFilesStore,
+} from "../aiMediaMessages/aiMediaMessageRecordsStore";
 import {
   createAiMediaMessageRecord,
   TAiMediaMessageRecord,
@@ -62,6 +65,8 @@ export const AiChatScreen = (p: { threadFriendlyId: string }) => {
   const aiThreadRecordsStore = useAiThreadRecordsStore();
   const currentThread = aiThreadRecordsStore.data?.find((x) => x.friendlyId === threadFriendlyId);
 
+  const cachedFilesStore = useCachedFilesStore();
+
   const aiTextMessagesRecordsStore = useAiTextMessageRecordsStore();
   const aiTextMessageRecords = currentThread?.id
     ? aiTextMessagesRecordsStore.getMessagesByThreadId(currentThread.id)
@@ -91,6 +96,7 @@ export const AiChatScreen = (p: { threadFriendlyId: string }) => {
     <MainLayout fillPageExactly padding={false}>
       <div className="flex h-full flex-col">
         <ScrollContainer scrollToBottomDeps={[threadFriendlyId]}>
+          <pre>{JSON.stringify(cachedFilesStore.data, null, 2)}</pre>
           <div className="p-4 pb-0">
             {aiTextWithMediaRecords.length === 0 && (
               <AssistantTextMessage>Hello! How can I help you today?</AssistantTextMessage>
