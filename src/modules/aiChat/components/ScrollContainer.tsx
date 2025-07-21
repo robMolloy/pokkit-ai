@@ -1,9 +1,13 @@
 import { CustomIcon } from "@/components/CustomIcon";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { DependencyList, useEffect, useRef, useState } from "react";
 
-export const ScrollContainer = (p: { children: React.ReactNode; className?: string }) => {
+export const ScrollContainer = (p: {
+  children: React.ReactNode;
+  className?: string;
+  scrollToBottomDeps?: DependencyList;
+}) => {
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isScrollingUpwards, setIsScrollingUpwards] = useState(false);
   const scrollContainer = useRef<HTMLDivElement>(null);
@@ -38,6 +42,8 @@ export const ScrollContainer = (p: { children: React.ReactNode; className?: stri
   }, []);
 
   useEffect(() => checkIfAtBottom(), []);
+
+  useEffect(() => scrollToBottom(), p.scrollToBottomDeps);
 
   return (
     <div className="relative flex-1">

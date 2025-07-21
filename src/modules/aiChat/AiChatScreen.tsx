@@ -45,7 +45,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
   return (
     <MainLayout fillPageExactly padding={false}>
       <div className="flex h-full flex-col">
-        <ScrollContainer>
+        <ScrollContainer scrollToBottomDeps={[threadId]}>
           <div className="p-4 pb-0">
             {!storeMessages && (
               <AssistantMessage>Hello! How can I help you today?</AssistantMessage>
