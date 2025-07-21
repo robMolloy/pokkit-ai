@@ -9,8 +9,14 @@ import {
 import { ScrollContainer } from "@/modules/aiChat/components/ScrollContainer";
 import { createAiMessageRecord } from "@/modules/aiMessages/dbAiMessageUtils";
 import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
-import { createAiThreadRecord } from "@/modules/aiThreads/dbAiThreadRecordUtils";
-import { TAnthropicMessage } from "@/modules/providers/anthropicApi";
+import {
+  createAiThreadRecord,
+  updateAiThreadRecordTitle,
+} from "@/modules/aiThreads/dbAiThreadRecordUtils";
+import {
+  createTitleForMessageThreadWithAnthropic,
+  TAnthropicMessage,
+} from "@/modules/providers/anthropicApi";
 import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { ErrorScreen } from "@/screens/ErrorScreen";
 import { LoadingScreen } from "@/screens/LoadingScreen";
@@ -83,6 +89,16 @@ export const AiChatScreen = (p: { threadId: string }) => {
                     contentSourceMediaType: "",
                   },
                 });
+
+                if (messages.length > 3 && !thread.title) {
+                  const resp = await createTitleForMessageThreadWithAnthropic({
+                    anthropic: anthropicInstance,
+                    messages,
+                  });
+
+                  if (resp.success)
+                    updateAiThreadRecordTitle({ pb, id: thread.id, title: resp.data });
+                }
               }}
               onModeChange={setMode}
               onUpdatedMessages={setMessages}

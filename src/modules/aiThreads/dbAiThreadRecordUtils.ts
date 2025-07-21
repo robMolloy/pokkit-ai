@@ -12,12 +12,14 @@ const aiThreadRecordSchema = z.object({
 });
 export type TAiThreadRecord = z.infer<typeof aiThreadRecordSchema>;
 
+const collectionName = "aiThreads";
+
 export const createAiThreadRecord = async (p: {
   pb: PocketBase;
   data: Omit<TAiThreadRecord, "collectionId" | "collectionName" | "id" | "created" | "updated">;
 }) => {
   try {
-    const resp = await p.pb.collection("aiThreads").create(p.data);
+    const resp = await p.pb.collection(collectionName).create(p.data);
     return aiThreadRecordSchema.safeParse(resp);
   } catch (error) {
     console.error(error);
@@ -27,7 +29,7 @@ export const createAiThreadRecord = async (p: {
 
 export const listAiThreadRecords = async (p: { pb: PocketBase }) => {
   try {
-    const initData = await p.pb.collection("aiThreads").getFullList({
+    const initData = await p.pb.collection(collectionName).getFullList({
       sort: "-created",
     });
 
@@ -56,7 +58,7 @@ export const smartSubscribeToAiThreadRecords = async (p: {
   p.onChange(allRecords);
 
   try {
-    const unsub = p.pb.collection("aiThreads").subscribe("*", (e) => {
+    const unsub = p.pb.collection(collectionName).subscribe("*", (e) => {
       if (e.action === "create") {
         const parseResp = aiThreadRecordSchema.safeParse(e.record);
         if (parseResp.success) allRecords.push(parseResp.data);
@@ -80,6 +82,19 @@ export const smartSubscribeToAiThreadRecords = async (p: {
     return { success: true, data: unsub } as const;
   } catch (error) {
     p.onError();
+    return { success: false, error } as const;
+  }
+};
+
+export const updateAiThreadRecordTitle = async (p: {
+  pb: PocketBase;
+  id: string;
+  title: TAiThreadRecord["title"];
+}) => {
+  try {
+    const resp = await p.pb.collection(collectionName).update(p.id, { title: p.title });
+    return { success: true, data: resp } as const;
+  } catch (error) {
     return { success: false, error } as const;
   }
 };

@@ -102,3 +102,23 @@ export const testAnthropicInstance = async (p: { anthropic: Anthropic }) => {
 
   return rtn;
 };
+
+export const createTitleForMessageThreadWithAnthropic = async (p: {
+  anthropic: Anthropic;
+  messages: TAnthropicMessage[];
+}) => {
+  const text =
+    "create a succinct title in plain text for the previous messages in this conversation";
+
+  const rtn = await callAnthropic({
+    anthropic: p.anthropic,
+    messages: [
+      ...p.messages,
+      createAnthropicMessage({ role: "user", content: [{ type: "text", text }] }),
+    ],
+    onStreamStatusChange: () => {},
+    onStreamChange: () => {},
+  });
+
+  return rtn;
+};

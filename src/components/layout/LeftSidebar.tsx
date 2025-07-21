@@ -115,19 +115,22 @@ export function LeftSidebar() {
           <div className="absolute inset-0 overflow-y-auto p-2">
             {aiThreadRecordsStore.data
               ?.sort((a, b) => (a.updated < b.updated ? 1 : -1))
-              .map((x) => (
-                <SidebarButton
-                  key={x.threadId}
-                  disabled={!anthropicStore.data}
-                  isHighlighted={x.threadId === threadId}
-                  onClick={() => router.push(`/ai-chat/${x.threadId}`)}
-                  tooltipContent={x.threadId}
-                >
-                  <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                    {x.threadId}
-                  </div>
-                </SidebarButton>
-              ))}
+              .map((x) => {
+                const label = x.title ? x.title : x.threadId;
+                return (
+                  <SidebarButton
+                    key={x.threadId}
+                    disabled={!anthropicStore.data}
+                    isHighlighted={x.threadId === threadId}
+                    onClick={() => router.push(`/ai-chat/${x.threadId}`)}
+                    tooltipContent={label}
+                  >
+                    <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                      {label}
+                    </div>
+                  </SidebarButton>
+                );
+              })}
           </div>
         </div>
 
