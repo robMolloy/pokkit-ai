@@ -1,16 +1,15 @@
 import { CustomIcon } from "@/components/CustomIcon";
 import { Button } from "@/components/ui/button";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { DisplayFilePreview } from "./FilePreviews";
 
 export const AiInputTextAndMedia = (p: {
   disabled: boolean;
-  text: string;
-  onInputText: (text: string) => void;
-  images: File[];
-  onInputImages: (images: File[]) => void;
+  onSubmit: (p: { text: string; files: File[] }) => Promise<void>;
 }) => {
+  const [files, setFiles] = useState<File[]>([]);
+  const [text, setText] = useState<string>("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -18,12 +17,12 @@ export const AiInputTextAndMedia = (p: {
       "image/*": [".png", ".jpg", ".jpeg", ".gif"],
       "application/pdf": [".pdf"],
     },
-    onDrop: (acceptedFiles) => p.onInputImages([...p.images, ...acceptedFiles]),
+    onDrop: (newFiles) => setFiles([...files, ...newFiles]),
     noClick: true,
   });
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    p.onInputText(e.target.value);
+    setText(e.target.value);
     if (!textareaRef.current) return;
 
     textareaRef.current.style.height = "auto";
@@ -40,9 +39,9 @@ export const AiInputTextAndMedia = (p: {
     }
 
     const cursorPosition = e.currentTarget.selectionStart;
-    const textBefore = p.text.substring(0, cursorPosition);
-    const textAfter = p.text.substring(cursorPosition);
-    p.onInputText(textBefore + "\n" + textAfter);
+    const textBefore = text.substring(0, cursorPosition);
+    const textAfter = text.substring(cursorPosition);
+    setText(textBefore + "\n" + textAfter);
     setTimeout(() => {
       if (!textareaRef.current) return;
 
@@ -52,46 +51,60 @@ export const AiInputTextAndMedia = (p: {
   };
 
   return (
-    <div>
-      {p.images.length > 0 && (
-        <div className="flex gap-4 overflow-x-auto overflow-y-visible pt-2">
-          {p.images.map((file, index) => (
-            <div key={index} className="relative h-20 w-20 flex-shrink-0">
-              <DisplayFilePreview file={file} />
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (p.disabled) return;
 
-              <button
-                type="button"
-                onClick={() => p.onInputImages(p.images.filter((_, i) => i !== index))}
-                className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"
-              >
-                <CustomIcon iconName="X" size="xs" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="mt-2 flex items-start">
-        <div className="relative flex-1" {...getRootProps()}>
-          <input {...getInputProps()} />
-          <textarea
-            ref={textareaRef}
-            value={p.text}
-            onChange={handleTextareaChange}
-            onKeyDown={handleKeyDown}
-            placeholder={isDragActive ? "Drop images here..." : "Type your message..."}
-            className={`w-full resize-none rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${isDragActive ? "border-primary" : ""}`}
-            rows={1}
-            style={{ minHeight: "80px", maxHeight: "160px" }}
-          />
-          <Button
-            type="submit"
-            disabled={p.disabled}
-            className="absolute bottom-3 right-1 h-8 w-8 p-0"
-          >
-            <CustomIcon iconName="Upload" size="sm" />
-          </Button>
+        const promise = p.onSubmit({ text, files });
+
+        setFiles([]);
+        setText("");
+
+        await promise;
+      }}
+    >
+      <div>
+        {files.length > 0 && (
+          <div className="flex gap-4 overflow-x-auto overflow-y-visible pt-2">
+            {files.map((file, index) => (
+              <div key={index} className="relative h-20 w-20 flex-shrink-0">
+                <DisplayFilePreview file={file} />
+
+                <button
+                  type="button"
+                  onClick={() => setFiles(files.filter((_, i) => i !== index))}
+                  className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"
+                >
+                  <CustomIcon iconName="X" size="xs" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="mt-2 flex items-start">
+          <div className="relative flex-1" {...getRootProps()}>
+            <input {...getInputProps()} />
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={handleTextareaChange}
+              onKeyDown={handleKeyDown}
+              placeholder={isDragActive ? "Drop images here..." : "Type your message..."}
+              className={`w-full resize-none rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${isDragActive ? "border-primary" : ""}`}
+              rows={1}
+              style={{ minHeight: "80px", maxHeight: "160px" }}
+            />
+            <Button
+              type="submit"
+              disabled={p.disabled}
+              className="absolute bottom-3 right-1 h-8 w-8 p-0"
+            >
+              <CustomIcon iconName="Upload" size="sm" />
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 };
