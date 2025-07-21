@@ -83,9 +83,9 @@ const SidebarButton = (p: {
 export function LeftSidebar() {
   const router = useRouter();
   const aiThreadRecordsStore = useAiThreadRecordsStore();
-  const threadId = router.query.threadId as string;
+  const threadFriendlyId = router.query.threadFriendlyId as string;
 
-  const currentThread = aiThreadRecordsStore.data?.find((x) => x.threadId === threadId);
+  const currentThread = aiThreadRecordsStore.data?.find((x) => x.friendlyId === threadFriendlyId);
 
   const currentUserStore = useCurrentUserStore();
   const usersStore = useUsersStore();
@@ -104,7 +104,7 @@ export function LeftSidebar() {
             <SidebarButton
               disabled={!anthropicStore.data}
               iconName="Brain"
-              isHighlighted={!currentThread && !!threadId}
+              isHighlighted={!currentThread && !!threadFriendlyId}
               onClick={() => router.push(`/ai-chat/${uuid()}`)}
             >
               AI Chat
@@ -112,17 +112,17 @@ export function LeftSidebar() {
           </div>
         </div>
         <div className="relative flex-1">
-          <div className="absolute inset-0 overflow-y-auto p-2">
+          <div className="absolute inset-0 flex flex-col gap-1 overflow-y-auto p-2">
             {aiThreadRecordsStore.data
               ?.sort((a, b) => (a.updated < b.updated ? 1 : -1))
               .map((x) => {
-                const label = x.title ? x.title : x.threadId;
+                const label = x.title ? x.title : x.friendlyId;
                 return (
                   <SidebarButton
-                    key={x.threadId}
+                    key={x.friendlyId}
                     disabled={!anthropicStore.data}
-                    isHighlighted={x.threadId === threadId}
-                    onClick={() => router.push(`/ai-chat/${x.threadId}`)}
+                    isHighlighted={x.friendlyId === threadFriendlyId}
+                    onClick={() => router.push(`/ai-chat/${x.friendlyId}`)}
                     tooltipContent={label}
                   >
                     <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">

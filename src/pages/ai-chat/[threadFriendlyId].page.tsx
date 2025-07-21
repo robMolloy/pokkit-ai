@@ -3,9 +3,9 @@ import { useRouter } from "next/router";
 
 const AiChatPage = () => {
   const router = useRouter();
-  const threadId = router.query.threadId as string;
+  const threadFriendlyId = router.query.threadFriendlyId as string;
 
-  return <AiChatScreen threadId={threadId} />;
+  return <AiChatScreen threadId={threadFriendlyId} />;
 };
 
 export default AiChatPage;

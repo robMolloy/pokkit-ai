@@ -39,7 +39,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
   const threadId = p.threadId;
 
   const aiThreadRecordsStore = useAiThreadRecordsStore();
-  const currentThread = aiThreadRecordsStore.data?.find((x) => x.threadId === threadId);
+  const currentThread = aiThreadRecordsStore.data?.find((x) => x.friendlyId === threadId);
 
   const aiTextMessagesStore = useAiTextMessageRecordsStore();
   const storeMessages = currentThread?.id
@@ -86,7 +86,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
 
                   const resp = await createAiThreadRecord({
                     pb,
-                    data: { threadId, title: "" },
+                    data: { friendlyId: threadId, title: "" },
                   });
                   if (resp.success) return resp.data;
                 })();

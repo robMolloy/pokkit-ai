@@ -18,6 +18,6 @@ export const useAiThreadRecordsStore = () => {
 
   return {
     ...store,
-    getThreadsById: (threadId: string) => store.data?.find((x) => x.threadId === threadId),
+    getThreadsById: (threadId: string) => store.data?.find((x) => x.friendlyId === threadId),
   };
 };

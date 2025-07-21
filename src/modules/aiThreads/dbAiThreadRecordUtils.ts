@@ -6,7 +6,7 @@ const aiThreadRecordSchema = z.object({
   collectionName: z.string(),
   id: z.string(),
   title: z.string(),
-  threadId: z.string(),
+  friendlyId: z.string(),
   created: z.string(),
   updated: z.string(),
 });

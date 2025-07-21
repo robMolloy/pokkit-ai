@@ -63,7 +63,7 @@ export const callAnthropic = async (p: {
   try {
     const stream = await p.anthropic.messages.create({
       model,
-      max_tokens: 1000,
+      max_tokens: 5000,
       messages: p.messages.map((x) => ({ role: x.role, content: x.content })),
       stream: true,
     });
