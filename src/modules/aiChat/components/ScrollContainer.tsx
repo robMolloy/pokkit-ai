@@ -43,7 +43,9 @@ export const ScrollContainer = (p: {
 
   useEffect(() => checkIfAtBottom(), []);
 
-  useEffect(() => scrollToBottom(), p.scrollToBottomDeps);
+  useEffect(() => {
+    if (p.scrollToBottomDeps) scrollToBottom();
+  }, p.scrollToBottomDeps ?? []);
 
   return (
     <div className="relative flex-1">
