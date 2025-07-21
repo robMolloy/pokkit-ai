@@ -1,9 +1,10 @@
 import { MainLayout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
 import {
-  AssistantMessage,
+  AssistantTextMessage,
   ErrorMessage,
-  UserMessageText,
+  UserMediaMessages,
+  UserTextMessage,
 } from "@/modules/aiChat/components/Messages";
 import { ScrollContainer } from "@/modules/aiChat/components/ScrollContainer";
 import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
@@ -31,7 +32,6 @@ import {
   createTitleForMessageThreadWithAnthropic,
 } from "../providers/anthropicApi";
 import { AiInputTextAndMedia } from "./components/AiInputTextAndImages";
-import { DisplayFilePreviewNew } from "./components/FilePreviews";
 import { convertFilesToFileDetails, createFileFromMediaUrl } from "./utils";
 
 const convertAiTextAndMediaMessageRecordsToAnthropicMessage = async (p: {
@@ -93,36 +93,28 @@ export const AiChatScreen = (p: { threadFriendlyId: string }) => {
         <ScrollContainer scrollToBottomDeps={[threadFriendlyId]}>
           <div className="p-4 pb-0">
             {aiTextWithMediaRecords.length === 0 && (
-              <AssistantMessage>Hello! How can I help you today?</AssistantMessage>
+              <AssistantTextMessage>Hello! How can I help you today?</AssistantTextMessage>
             )}
             {aiTextWithMediaRecords.map((x) => {
               if (x.textMessage.role === "assistant")
                 return (
-                  <AssistantMessage key={x.textMessage.id}>
+                  <AssistantTextMessage key={x.textMessage.id}>
                     {x.textMessage.contentText}
-                  </AssistantMessage>
+                  </AssistantTextMessage>
                 );
 
               return (
                 <React.Fragment key={x.textMessage.id}>
-                  <UserMessageText key={x.textMessage.id}>
+                  <UserTextMessage key={x.textMessage.id}>
                     {x.textMessage.contentText}
-                  </UserMessageText>
-                  {x.mediaMessages && (
-                    <div className="flex gap-2 overflow-x-auto pt-2">
-                      {x.mediaMessages.map((mediaMessage) => (
-                        <div key={`${mediaMessage.id}-${x.textMessage.id}`} className="h-20 w-20">
-                          <DisplayFilePreviewNew url={mediaMessage.file} id={mediaMessage.id} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  </UserTextMessage>
+                  {x.mediaMessages && <UserMediaMessages mediaMessageRecords={x.mediaMessages} />}
                 </React.Fragment>
               );
             })}
 
             {mode === "thinking" && <p>Thinking...</p>}
-            {mode === "streaming" && <AssistantMessage>{streamedText}</AssistantMessage>}
+            {mode === "streaming" && <AssistantTextMessage>{streamedText}</AssistantTextMessage>}
             {mode === "error" && <ErrorMessage />}
           </div>
         </ScrollContainer>
@@ -133,6 +125,9 @@ export const AiChatScreen = (p: { threadFriendlyId: string }) => {
               disabled={mode === "thinking" || mode === "streaming"}
               onSubmit={async (x) => {
                 setMode("thinking");
+                // const resp = ((): { success: false; error: string } | { success: true } => {
+                //   return { success: true };
+                // })();
 
                 const thread = await (async () => {
                   if (currentThread) return currentThread;

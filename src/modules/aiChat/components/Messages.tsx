@@ -1,10 +1,10 @@
 import { CustomIcon } from "@/components/CustomIcon";
 import { Card, CardContent } from "@/components/ui/card";
-import { TAiTextMessageRecord } from "@/modules/aiTextMessages/dbAiTextMessageUtils";
-import React from "react";
 import Markdown from "react-markdown";
+import { DisplayFilePreviewNew } from "./FilePreviews";
+import { TAiMediaMessageRecord } from "@/modules/aiMediaMessages/dbAiMediaMessageUtils";
 
-export const AssistantMessage = (p: { children: string }) => {
+export const AssistantTextMessage = (p: { children: string }) => {
   return (
     <div className="react-markdown">
       <Markdown>{p.children}</Markdown>
@@ -12,26 +12,27 @@ export const AssistantMessage = (p: { children: string }) => {
   );
 };
 
-export const UserMessageText = (p: { children: string }) => {
+export const UserTextMessage = (p: { children: string }) => {
   return (
     <div className="flex items-start">
       <Card>
         <CardContent className="p-2">
-          <p className="text-foreground">{p.children}</p>
+          <div className="react-markdown">
+            <Markdown>{p.children}</Markdown>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
 };
-
-export const UserMessageImage = (p: { children: string }) => {
+export const UserMediaMessages = (p: { mediaMessageRecords: TAiMediaMessageRecord[] }) => {
   return (
-    <div className="w-20 flex-shrink-0 items-start">
-      <img
-        src={`data:image/jpeg;base64,${p.children}`}
-        alt="User uploaded image"
-        className="max-h-64 rounded-md object-contain"
-      />
+    <div className="flex gap-2 overflow-x-auto pt-2">
+      {p.mediaMessageRecords.map((mediaMessage) => (
+        <div key={mediaMessage.id} className="h-20 w-20">
+          <DisplayFilePreviewNew url={mediaMessage.file} id={mediaMessage.id} />
+        </div>
+      ))}
     </div>
   );
 };
@@ -50,61 +51,3 @@ export const ErrorMessage = () => {
     </div>
   );
 };
-
-export const DisplayChatMessageRecords = React.memo((p: { messages: TAiTextMessageRecord[] }) => {
-  return (
-    <>
-      {p.messages.map((x) => {
-        if (x.role === "assistant")
-          return <AssistantMessage key={x.id}>{x.contentText}</AssistantMessage>;
-
-        return (
-          <React.Fragment key={x.id}>
-            <UserMessageText key={x.id}>{x.contentText}</UserMessageText>
-            {/* <div className="flex items-center gap-2 overflow-x-auto pt-2">
-              {imageContent.map((content, j) => {
-                return (
-                  <UserMessageImage key={`${x.id}-${j}`}>{content.source.data}</UserMessageImage>
-                );
-              })}
-            </div> */}
-          </React.Fragment>
-        );
-      })}
-    </>
-  );
-});
-// export const DisplayChatMessages = React.memo((p: { messages: TAnthropicMessage[] }) => {
-//   return (
-//     <>
-//       {p.messages.map((x) => {
-//         if (x.role === "assistant")
-//           return x.content.map((content, j) => {
-//             return (
-//               <AssistantMessage key={`${x.id}-${j}`}>
-//                 {content.type === "text" ? content.text : ""}
-//               </AssistantMessage>
-//             );
-//           });
-
-//         const textContent = x.content.filter((x) => x.type === "text");
-//         const imageContent = x.content.filter((x) => x.type === "image");
-
-//         return (
-//           <React.Fragment key={x.id}>
-//             {textContent.map((content, j) => {
-//               return <UserMessageText key={`${x.id}-${j}`}>{content.text}</UserMessageText>;
-//             })}
-//             <div className="flex items-center gap-2 overflow-x-auto pt-2">
-//               {imageContent.map((content, j) => {
-//                 return (
-//                   <UserMessageImage key={`${x.id}-${j}`}>{content.source.data}</UserMessageImage>
-//                 );
-//               })}
-//             </div>
-//           </React.Fragment>
-//         );
-//       })}
-//     </>
-//   );
-// });
