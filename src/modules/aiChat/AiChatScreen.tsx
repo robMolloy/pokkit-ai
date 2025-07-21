@@ -2,7 +2,7 @@ import { MainLayout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
 import {
   AiChatForm,
-  convertAiMessageRecordToAnthropicMessage,
+  convertAiTextMessageRecordToAnthropicMessage,
 } from "@/modules/aiChat/components/AiChatForm";
 import {
   AssistantMessage,
@@ -10,7 +10,7 @@ import {
   ErrorMessage,
 } from "@/modules/aiChat/components/Messages";
 import { ScrollContainer } from "@/modules/aiChat/components/ScrollContainer";
-import { createAiMessageRecord } from "@/modules/aiMessages/dbAiMessageUtils";
+import { createAiTextMessageRecord } from "@/modules/aiTextMessages/dbAiTextMessageUtils";
 import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
 import {
   createAiThreadRecord,
@@ -21,7 +21,7 @@ import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { ErrorScreen } from "@/screens/ErrorScreen";
 import { LoadingScreen } from "@/screens/LoadingScreen";
 import { useState } from "react";
-import { useAiMessageRecordsStore } from "../aiMessages/aiMessageRecordsStore";
+import { useAiTextMessageRecordsStore } from "../aiTextMessages/aiTextMessageRecordsStore";
 
 export const AiChatScreen = (p: { threadId: string }) => {
   const threadId = p.threadId;
@@ -29,9 +29,9 @@ export const AiChatScreen = (p: { threadId: string }) => {
   const aiThreadRecordsStore = useAiThreadRecordsStore();
   const currentThread = aiThreadRecordsStore.data?.find((x) => x.threadId === threadId);
 
-  const aiMessagesStore = useAiMessageRecordsStore();
+  const aiTextMessagesStore = useAiTextMessageRecordsStore();
   const storeMessages = currentThread?.id
-    ? aiMessagesStore.getMessagesByThreadId(currentThread.id)
+    ? aiTextMessagesStore.getMessagesByThreadId(currentThread.id)
     : undefined;
 
   const anthropicStore = useAnthropicStore();
@@ -77,7 +77,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
                 })();
                 if (!thread) return;
 
-                await createAiMessageRecord({
+                await createAiTextMessageRecord({
                   pb,
                   data: {
                     threadId: thread.id,
@@ -94,7 +94,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
                   const resp = await createTitleForMessageThreadWithAnthropic({
                     anthropic: anthropicInstance,
                     messages: (storeMessages ?? [])
-                      .map((x) => convertAiMessageRecordToAnthropicMessage(x))
+                      .map((x) => convertAiTextMessageRecordToAnthropicMessage(x))
                       .filter((x) => !!x),
                   });
 
@@ -108,7 +108,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
                 const thread = aiThreadRecordsStore.data?.find((x) => x.threadId === threadId);
                 if (!thread) return;
 
-                await createAiMessageRecord({
+                await createAiTextMessageRecord({
                   pb,
                   data: {
                     threadId: thread.id,

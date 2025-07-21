@@ -1,6 +1,6 @@
 import { CustomIcon } from "@/components/CustomIcon";
 import { Card, CardContent } from "@/components/ui/card";
-import { TAiMessageRecord } from "@/modules/aiMessages/dbAiMessageUtils";
+import { TAiTextMessageRecord } from "@/modules/aiTextMessages/dbAiTextMessageUtils";
 import React from "react";
 import Markdown from "react-markdown";
 
@@ -51,7 +51,7 @@ export const ErrorMessage = () => {
   );
 };
 
-export const DisplayChatMessageRecords = React.memo((p: { messages: TAiMessageRecord[] }) => {
+export const DisplayChatMessageRecords = React.memo((p: { messages: TAiTextMessageRecord[] }) => {
   return (
     <>
       {p.messages.map((x) => {

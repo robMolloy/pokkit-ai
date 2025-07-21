@@ -1,11 +1,13 @@
-import { TAiMessageRecord } from "@/modules/aiMessages/dbAiMessageUtils";
+import { TAiTextMessageRecord } from "@/modules/aiTextMessages/dbAiTextMessageUtils";
 import { callAnthropic, createAnthropicMessage } from "@/modules/providers/anthropicApi";
 import Anthropic from "@anthropic-ai/sdk";
 import { useEffect, useState } from "react";
 import { convertFilesToFileDetails } from "../utils";
 import { AiInputTextAndMedia } from "./AiInputTextAndImages";
 
-export const convertAiMessageRecordToAnthropicMessage = (messageRecord: TAiMessageRecord) => {
+export const convertAiTextMessageRecordToAnthropicMessage = (
+  messageRecord: TAiTextMessageRecord,
+) => {
   if (!messageRecord.contentText) return;
   return createAnthropicMessage({
     role: messageRecord.role,
@@ -15,7 +17,7 @@ export const convertAiMessageRecordToAnthropicMessage = (messageRecord: TAiMessa
 
 export const AiChatForm = (p: {
   anthropic: Anthropic;
-  messages: TAiMessageRecord[];
+  messages: TAiTextMessageRecord[];
   onSubmitMessage: (message: string) => void;
   onModeChange: (mode: "ready" | "thinking" | "streaming" | "error") => void;
   onStream: (text: string) => void;
@@ -43,7 +45,7 @@ export const AiChatForm = (p: {
     });
 
     const anthropicMessages = [
-      ...p.messages.map((x) => convertAiMessageRecordToAnthropicMessage(x)).filter((x) => !!x),
+      ...p.messages.map((x) => convertAiTextMessageRecordToAnthropicMessage(x)).filter((x) => !!x),
       newUserMessage,
     ];
 

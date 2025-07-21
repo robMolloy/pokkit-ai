@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { TAiMessageRecord } from "./dbAiMessageUtils";
+import { TAiTextMessageRecord } from "./dbAiTextMessageUtils";
 
-type TState = TAiMessageRecord[] | undefined | null;
+type TState = TAiTextMessageRecord[] | undefined | null;
 
-const useInitAiMessageRecordsStore = create<{
+const useInitAiTextMessageRecordsStore = create<{
   data: TState;
   setData: (x: TState) => void;
   clear: () => void;
@@ -13,8 +13,8 @@ const useInitAiMessageRecordsStore = create<{
   clear: () => set(() => ({ data: undefined })),
 }));
 
-export const useAiMessageRecordsStore = () => {
-  const store = useInitAiMessageRecordsStore();
+export const useAiTextMessageRecordsStore = () => {
+  const store = useInitAiTextMessageRecordsStore();
 
   return {
     ...store,

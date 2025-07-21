@@ -1,7 +1,7 @@
 import { z } from "zod";
 import PocketBase from "pocketbase";
 
-const aiMessageRecordSchema = z.object({
+const aiTextMessageRecordSchema = z.object({
   collectionId: z.string(),
   collectionName: z.string(),
   id: z.string(),
@@ -15,30 +15,33 @@ const aiMessageRecordSchema = z.object({
   created: z.string(),
   updated: z.string(),
 });
-export type TAiMessageRecord = z.infer<typeof aiMessageRecordSchema>;
+export type TAiTextMessageRecord = z.infer<typeof aiTextMessageRecordSchema>;
 
-const collectionName = "aiMessages";
+const collectionName = "aiTextMessages";
 
-export const createAiMessageRecord = async (p: {
+export const createAiTextMessageRecord = async (p: {
   pb: PocketBase;
-  data: Omit<TAiMessageRecord, "collectionId" | "collectionName" | "id" | "created" | "updated">;
+  data: Omit<
+    TAiTextMessageRecord,
+    "collectionId" | "collectionName" | "id" | "created" | "updated"
+  >;
 }) => {
   try {
     const resp = await p.pb.collection(collectionName).create(p.data);
-    return aiMessageRecordSchema.safeParse(resp);
+    return aiTextMessageRecordSchema.safeParse(resp);
   } catch (error) {
     console.error(error);
     return { success: false, error } as const;
   }
 };
-export const listAiMessageRecords = async (p: { pb: PocketBase }) => {
+export const listAiTextMessageRecords = async (p: { pb: PocketBase }) => {
   try {
     const initData = await p.pb.collection(collectionName).getFullList({
       sort: "-created",
     });
 
     const data = initData
-      .map((x) => aiMessageRecordSchema.safeParse(x))
+      .map((x) => aiTextMessageRecordSchema.safeParse(x))
       .filter((x) => x.success)
       .map((x) => x.data);
     return { success: true, data } as const;
@@ -47,35 +50,35 @@ export const listAiMessageRecords = async (p: { pb: PocketBase }) => {
   }
 };
 
-export const smartSubscribeToAiMessageRecords = async (p: {
+export const smartSubscribeToAiTextMessageRecords = async (p: {
   pb: PocketBase;
-  onChange: (x: TAiMessageRecord[]) => void;
+  onChange: (x: TAiTextMessageRecord[]) => void;
   onError: () => void;
 }) => {
-  const listAiMessageRecordsResp = await listAiMessageRecords(p);
-  if (!listAiMessageRecordsResp.success) {
+  const listAiTextMessageRecordsResp = await listAiTextMessageRecords(p);
+  if (!listAiTextMessageRecordsResp.success) {
     p.onError();
-    return listAiMessageRecordsResp;
+    return listAiTextMessageRecordsResp;
   }
 
-  let allRecords = listAiMessageRecordsResp.data;
+  let allRecords = listAiTextMessageRecordsResp.data;
   p.onChange(allRecords);
 
   try {
     const unsub = p.pb.collection(collectionName).subscribe("*", (e) => {
       if (e.action === "create") {
-        const parseResp = aiMessageRecordSchema.safeParse(e.record);
+        const parseResp = aiTextMessageRecordSchema.safeParse(e.record);
         if (parseResp.success) allRecords.push(parseResp.data);
       }
       if (e.action === "update") {
-        const parseResp = aiMessageRecordSchema.safeParse(e.record);
+        const parseResp = aiTextMessageRecordSchema.safeParse(e.record);
         if (!parseResp.success) return;
 
         allRecords = allRecords.filter((x) => parseResp.data?.id !== x.id);
         allRecords.push(parseResp.data);
       }
       if (e.action === "delete") {
-        const parseResp = aiMessageRecordSchema.safeParse(e.record);
+        const parseResp = aiTextMessageRecordSchema.safeParse(e.record);
         if (!parseResp.success) return;
 
         allRecords = allRecords.filter((x) => parseResp.data?.id !== x.id);

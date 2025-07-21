@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
-import { useAiMessageRecordsStore } from "@/modules/aiMessages/aiMessageRecordsStore";
-import { smartSubscribeToAiMessageRecords } from "@/modules/aiMessages/dbAiMessageUtils";
+import { useAiTextMessageRecordsStore } from "@/modules/aiTextMessages/aiTextMessageRecordsStore";
+import { smartSubscribeToAiTextMessageRecords } from "@/modules/aiTextMessages/dbAiTextMessageUtils";
 import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
 import { smartSubscribeToAiThreadRecords } from "@/modules/aiThreads/dbAiThreadRecordUtils";
 import { AuthForm } from "@/modules/auth/AuthForm";
@@ -47,7 +47,6 @@ const useAuth = (p: {
 
       return subscribeToUser({
         pb,
-
         id: unverifiedIsLoggedInStore.data.auth.record.id,
         onChange: (user) => {
           if (user) currentUserStore.setData({ status: "loggedIn", user });
@@ -74,7 +73,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const providerRecordsStore = useProviderRecordsStore();
   const currentUserStore = useCurrentUserStore();
   const aiThreadRecordsStore = useAiThreadRecordsStore();
-  const aiMessageRecordsStore = useAiMessageRecordsStore();
+  const aiTextMessageRecordsStore = useAiTextMessageRecordsStore();
 
   themeStore.useThemeStoreSideEffect();
 
@@ -94,10 +93,10 @@ export default function App({ Component, pageProps }: AppProps) {
         onChange: (x) => aiThreadRecordsStore.setData(x),
         onError: () => aiThreadRecordsStore.setData(null),
       });
-      smartSubscribeToAiMessageRecords({
+      smartSubscribeToAiTextMessageRecords({
         pb,
-        onChange: (x) => aiMessageRecordsStore.setData(x),
-        onError: () => aiMessageRecordsStore.setData(null),
+        onChange: (x) => aiTextMessageRecordsStore.setData(x),
+        onError: () => aiTextMessageRecordsStore.setData(null),
       });
     },
     onIsLoggedOut: () => {},
