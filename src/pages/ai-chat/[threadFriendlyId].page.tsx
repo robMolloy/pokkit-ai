@@ -5,7 +5,7 @@ const AiChatPage = () => {
   const router = useRouter();
   const threadFriendlyId = router.query.threadFriendlyId as string;
 
-  return <AiChatScreen threadId={threadFriendlyId} />;
+  return <AiChatScreen threadFriendlyId={threadFriendlyId} />;
 };
 
 export default AiChatPage;

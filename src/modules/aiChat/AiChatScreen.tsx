@@ -2,15 +2,15 @@ import { MainLayout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
 import {
   AssistantMessage,
-  DisplayChatMessageRecords,
   ErrorMessage,
+  UserMessageText,
 } from "@/modules/aiChat/components/Messages";
 import { ScrollContainer } from "@/modules/aiChat/components/ScrollContainer";
 import { useAiThreadRecordsStore } from "@/modules/aiThreads/aiThreadRecordsStore";
 import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { ErrorScreen } from "@/screens/ErrorScreen";
 import { LoadingScreen } from "@/screens/LoadingScreen";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useAiMediaMessageRecordsStore } from "../aiMediaMessages/aiMediaMessageRecordsStore";
 import { createAiMediaMessageRecord } from "../aiMediaMessages/dbAiMediaMessageUtils";
 import { useAiTextMessageRecordsStore } from "../aiTextMessages/aiTextMessageRecordsStore";
@@ -38,11 +38,11 @@ const convertAiTextMessageRecordToAnthropicMessage = (messageRecord: TAiTextMess
   });
 };
 
-export const AiChatScreen = (p: { threadId: string }) => {
-  const threadId = p.threadId;
+export const AiChatScreen = (p: { threadFriendlyId: string }) => {
+  const threadFriendlyId = p.threadFriendlyId;
 
   const aiThreadRecordsStore = useAiThreadRecordsStore();
-  const currentThread = aiThreadRecordsStore.data?.find((x) => x.friendlyId === threadId);
+  const currentThread = aiThreadRecordsStore.data?.find((x) => x.friendlyId === threadFriendlyId);
 
   const aiTextMessagesRecordsStore = useAiTextMessageRecordsStore();
   const aiTextMessageRecords = currentThread?.id
@@ -53,6 +53,13 @@ export const AiChatScreen = (p: { threadId: string }) => {
   const aiMediaMessageRecords = currentThread?.id
     ? aiMediaMessagesRecordsStore.getMessagesByThreadId(currentThread.id)
     : undefined;
+
+  const aiTextWithMedia = (aiTextMessageRecords ?? [])
+    .map((x) => ({
+      textMessages: x,
+      mediaMessages: aiMediaMessageRecords?.filter((y) => y.aiTextMessageId === x.id),
+    }))
+    .sort((a, b) => (a.textMessages.created < b.textMessages.created ? -1 : 1));
 
   const anthropicStore = useAnthropicStore();
   const anthropicInstance = anthropicStore.data;
@@ -65,26 +72,36 @@ export const AiChatScreen = (p: { threadId: string }) => {
   return (
     <MainLayout fillPageExactly padding={false}>
       <div className="flex h-full flex-col">
-        <ScrollContainer scrollToBottomDeps={[threadId]}>
+        <ScrollContainer scrollToBottomDeps={[threadFriendlyId]}>
           <div className="p-4 pb-0">
-            {!aiTextMessageRecords && (
+            {aiTextWithMedia.length === 0 && (
               <AssistantMessage>Hello! How can I help you today?</AssistantMessage>
             )}
-            {aiTextMessageRecords && (
-              <DisplayChatMessageRecords
-                messages={aiTextMessageRecords.sort((a, b) => (a.created < b.created ? -1 : 1))}
-              />
-            )}
+            {aiTextWithMedia.map((x) => {
+              if (x.textMessages.role === "assistant")
+                return (
+                  <AssistantMessage key={x.textMessages.id}>
+                    {x.textMessages.contentText}
+                  </AssistantMessage>
+                );
 
-            {aiMediaMessageRecords && (
-              <div className="flex gap-2 overflow-x-auto">
-                {aiMediaMessageRecords.map((x) => (
-                  <div key={x.id} className="h-32 w-32">
-                    <DisplayFilePreviewNew url={x.file} id={x.id} />
-                  </div>
-                ))}
-              </div>
-            )}
+              return (
+                <React.Fragment key={x.textMessages.id}>
+                  <UserMessageText key={x.textMessages.id}>
+                    {x.textMessages.contentText}
+                  </UserMessageText>
+                  {x.mediaMessages && (
+                    <div className="flex gap-2 overflow-x-auto pt-2">
+                      {x.mediaMessages.map((media) => (
+                        <div key={media.id} className="h-20 w-20">
+                          <DisplayFilePreviewNew url={media.file} id={media.id} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            })}
 
             {mode === "thinking" && <p>Thinking...</p>}
             {mode === "streaming" && <AssistantMessage>{streamedText}</AssistantMessage>}
@@ -104,20 +121,27 @@ export const AiChatScreen = (p: { threadId: string }) => {
 
                   const resp = await createAiThreadRecord({
                     pb,
-                    data: { friendlyId: threadId, title: "" },
+                    data: { friendlyId: threadFriendlyId, title: "" },
                   });
                   if (resp.success) return resp.data;
                 })();
 
                 if (!thread) return;
 
-                await createAiTextMessageRecord({
+                const createAiTextMessageRecordResp = await createAiTextMessageRecord({
                   pb,
                   data: { threadId: thread.id, role: "user", contentText: x.text },
                 });
 
+                if (!createAiTextMessageRecordResp.success) return;
+
+                const aiTextMessageId = createAiTextMessageRecordResp.data.id;
+
                 const promises = x.files.map((file) =>
-                  createAiMediaMessageRecord({ pb, data: { threadId: thread.id, file } }),
+                  createAiMediaMessageRecord({
+                    pb,
+                    data: { threadId: thread.id, file, aiTextMessageId },
+                  }),
                 );
                 await Promise.all(promises);
 

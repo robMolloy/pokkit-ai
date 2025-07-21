@@ -7,6 +7,7 @@ const aiMediaMessageRecordSchema = z.object({
   id: z.string(),
   threadId: z.string(),
   file: z.string(),
+  aiTextMessageId: z.string(),
   created: z.string(),
   updated: z.string(),
 });
