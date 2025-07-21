@@ -79,15 +79,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
 
                 await createAiTextMessageRecord({
                   pb,
-                  data: {
-                    threadId: thread.id,
-                    role: "user",
-                    contentType: "text",
-                    contentText: messageText,
-                    contentSourceType: "",
-                    contentSourceData: "",
-                    contentSourceMediaType: "",
-                  },
+                  data: { threadId: thread.id, role: "user", contentText: messageText },
                 });
 
                 if ((storeMessages ?? []).length > 1 && !thread.title) {
@@ -110,15 +102,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
 
                 await createAiTextMessageRecord({
                   pb,
-                  data: {
-                    threadId: thread.id,
-                    role: "assistant",
-                    contentType: "text",
-                    contentText: newMessageText,
-                    contentSourceType: "",
-                    contentSourceData: "",
-                    contentSourceMediaType: "",
-                  },
+                  data: { threadId: thread.id, role: "assistant", contentText: newMessageText },
                 });
                 setStreamedResponse("");
               }}
