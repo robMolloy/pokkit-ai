@@ -53,27 +53,27 @@ const SidebarButton = (p: {
       <PossibleTooltipWrapper tooltipContent={p.tooltipContent}>
         <Button
           variant={p.isHighlighted ? "secondary" : "ghost"}
-          className={`relative w-full justify-start pl-6 ${p.disabled ? "pointer-events-none" : ""}`}
+          className={`w-full ${p.disabled ? "pointer-events-none" : ""}`}
           onClick={p.onClick}
           disabled={p.disabled}
         >
-          {p.iconName && (
-            <span className="mr-2">
+          <span className="flex w-full items-center gap-2 text-left">
+            {p.iconName && (
               <CustomIcon
                 iconName={p.iconName}
                 size="sm"
                 className={p.disabled ? "text-muted-foreground" : ""}
               />
-            </span>
-          )}
+            )}
 
-          {p.children}
+            {p.children}
 
-          {p.badgeCount !== undefined && p.badgeCount > 0 && (
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-destructive px-2 py-0.5 text-xs text-destructive-foreground">
-              {p.badgeCount}
-            </span>
-          )}
+            {p.badgeCount !== undefined && p.badgeCount > 0 && (
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-destructive px-2 py-0.5 text-xs text-destructive-foreground">
+                {p.badgeCount}
+              </span>
+            )}
+          </span>
         </Button>
       </PossibleTooltipWrapper>
     </SidebarButtonWrapper>
