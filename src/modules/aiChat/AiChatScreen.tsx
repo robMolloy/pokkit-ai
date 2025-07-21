@@ -1,6 +1,9 @@
 import { MainLayout } from "@/components/layout/Layout";
 import { pb } from "@/config/pocketbaseConfig";
-import { AiChatForm } from "@/modules/aiChat/components/AiChatForm";
+import {
+  AiChatForm,
+  convertAiMessageRecordToAnthropicMessage,
+} from "@/modules/aiChat/components/AiChatForm";
 import {
   AssistantMessage,
   DisplayChatMessageRecords,
@@ -13,10 +16,7 @@ import {
   createAiThreadRecord,
   updateAiThreadRecordTitle,
 } from "@/modules/aiThreads/dbAiThreadRecordUtils";
-import {
-  createTitleForMessageThreadWithAnthropic,
-  TAnthropicMessage,
-} from "@/modules/providers/anthropicApi";
+import { createTitleForMessageThreadWithAnthropic } from "@/modules/providers/anthropicApi";
 import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { ErrorScreen } from "@/screens/ErrorScreen";
 import { LoadingScreen } from "@/screens/LoadingScreen";
@@ -37,7 +37,6 @@ export const AiChatScreen = (p: { threadId: string }) => {
   const anthropicStore = useAnthropicStore();
   const anthropicInstance = anthropicStore.data;
   const [mode, setMode] = useState<"ready" | "thinking" | "streaming" | "error">("ready");
-  const [messages, setMessages] = useState<TAnthropicMessage[]>([]);
   const [streamedResponse, setStreamedResponse] = useState("");
 
   if (aiThreadRecordsStore.data === undefined) return <LoadingScreen />;
@@ -47,9 +46,10 @@ export const AiChatScreen = (p: { threadId: string }) => {
     <MainLayout fillPageExactly padding={false}>
       <div className="flex h-full flex-col">
         <ScrollContainer>
-          {/* <pre>{JSON.stringify({ aiMessagesStore, storeMessages }, undefined, 2)}</pre> */}
           <div className="p-4 pb-0">
-            <AssistantMessage>Hello! How can I help you today?</AssistantMessage>
+            {!storeMessages && (
+              <AssistantMessage>Hello! How can I help you today?</AssistantMessage>
+            )}
             {storeMessages && (
               <DisplayChatMessageRecords
                 messages={storeMessages.sort((a, b) => (a.created < b.created ? -1 : 1))}
@@ -66,7 +66,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
           {anthropicInstance ? (
             <AiChatForm
               anthropic={anthropicInstance}
-              messages={messages}
+              messages={storeMessages ?? []}
               onSubmitMessage={async (messageText) => {
                 const thread = await (async () => {
                   if (currentThread) return currentThread;
@@ -90,10 +90,12 @@ export const AiChatScreen = (p: { threadId: string }) => {
                   },
                 });
 
-                if (messages.length > 3 && !thread.title) {
+                if ((storeMessages ?? []).length > 1 && !thread.title) {
                   const resp = await createTitleForMessageThreadWithAnthropic({
                     anthropic: anthropicInstance,
-                    messages,
+                    messages: (storeMessages ?? [])
+                      .map((x) => convertAiMessageRecordToAnthropicMessage(x))
+                      .filter((x) => !!x),
                   });
 
                   if (resp.success)
@@ -101,12 +103,8 @@ export const AiChatScreen = (p: { threadId: string }) => {
                 }
               }}
               onModeChange={setMode}
-              onUpdatedMessages={setMessages}
               onStream={(text) => setStreamedResponse(text)}
-              onComplete={async ({ messages, newMessageText }) => {
-                setMessages(messages);
-                setStreamedResponse("");
-
+              onComplete={async ({ newMessageText }) => {
                 const thread = aiThreadRecordsStore.data?.find((x) => x.threadId === threadId);
                 if (!thread) return;
 
@@ -122,6 +120,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
                     contentSourceMediaType: "",
                   },
                 });
+                setStreamedResponse("");
               }}
             />
           ) : (

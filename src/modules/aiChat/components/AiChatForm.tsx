@@ -1,21 +1,25 @@
+import { TAiMessageRecord } from "@/modules/aiMessages/dbAiMessageUtils";
+import { callAnthropic, createAnthropicMessage } from "@/modules/providers/anthropicApi";
+import Anthropic from "@anthropic-ai/sdk";
 import { useEffect, useState } from "react";
-import {
-  callAnthropic,
-  createAnthropicMessage,
-  TAnthropicMessage,
-} from "@/modules/providers/anthropicApi";
 import { convertFilesToFileDetails } from "../utils";
 import { AiInputTextAndMedia } from "./AiInputTextAndImages";
-import Anthropic from "@anthropic-ai/sdk";
+
+export const convertAiMessageRecordToAnthropicMessage = (messageRecord: TAiMessageRecord) => {
+  if (!messageRecord.contentText) return;
+  return createAnthropicMessage({
+    role: messageRecord.role,
+    content: [{ type: "text", text: messageRecord.contentText }],
+  });
+};
 
 export const AiChatForm = (p: {
   anthropic: Anthropic;
-  messages: TAnthropicMessage[];
+  messages: TAiMessageRecord[];
   onSubmitMessage: (message: string) => void;
-  onUpdatedMessages: (messages: TAnthropicMessage[]) => void;
   onModeChange: (mode: "ready" | "thinking" | "streaming" | "error") => void;
   onStream: (text: string) => void;
-  onComplete: (p: { messages: TAnthropicMessage[]; newMessageText: string }) => void;
+  onComplete: (p: { newMessageText: string }) => void;
 }) => {
   const [currentInput, setCurrentInput] = useState("");
   const [currentImages, setCurrentImages] = useState<File[]>([]);
@@ -38,15 +42,17 @@ export const AiChatForm = (p: {
       ],
     });
 
-    const updatedMessages = [...p.messages, newUserMessage];
+    const anthropicMessages = [
+      ...p.messages.map((x) => convertAiMessageRecordToAnthropicMessage(x)).filter((x) => !!x),
+      newUserMessage,
+    ];
 
-    p.onUpdatedMessages(updatedMessages);
     setCurrentInput("");
     setCurrentImages([]);
 
     const resp = await callAnthropic({
       anthropic: p.anthropic,
-      messages: updatedMessages,
+      messages: anthropicMessages,
       onStreamStatusChange: (x) => setMode(x === "finished" ? "ready" : x),
       onStreamChange: (text) => p.onStream(text),
     });
@@ -56,11 +62,7 @@ export const AiChatForm = (p: {
       return setMode("error");
     }
 
-    const newMessage = createAnthropicMessage({
-      role: "assistant",
-      content: [{ type: "text", text: resp.data }],
-    });
-    p.onComplete({ messages: [...updatedMessages, newMessage], newMessageText: resp.data });
+    p.onComplete({ newMessageText: resp.data });
   };
 
   return (
