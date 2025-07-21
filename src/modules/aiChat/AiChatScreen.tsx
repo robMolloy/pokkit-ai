@@ -12,7 +12,10 @@ import { ErrorScreen } from "@/screens/ErrorScreen";
 import { LoadingScreen } from "@/screens/LoadingScreen";
 import React, { useState } from "react";
 import { useAiMediaMessageRecordsStore } from "../aiMediaMessages/aiMediaMessageRecordsStore";
-import { createAiMediaMessageRecord } from "../aiMediaMessages/dbAiMediaMessageUtils";
+import {
+  createAiMediaMessageRecord,
+  TAiMediaMessageRecord,
+} from "../aiMediaMessages/dbAiMediaMessageUtils";
 import { useAiTextMessageRecordsStore } from "../aiTextMessages/aiTextMessageRecordsStore";
 import {
   createAiTextMessageRecord,
@@ -29,12 +32,27 @@ import {
 } from "../providers/anthropicApi";
 import { AiInputTextAndMedia } from "./components/AiInputTextAndImages";
 import { DisplayFilePreviewNew } from "./components/FilePreviews";
-import { convertFilesToFileDetails } from "./utils";
+import { convertFilesToFileDetails, createFileFromMediaUrl } from "./utils";
 
-const convertAiTextMessageRecordToAnthropicMessage = (messageRecord: TAiTextMessageRecord) => {
+const convertAiTextAndMediaMessageRecordsToAnthropicMessage = async (p: {
+  textMessage: TAiTextMessageRecord;
+  mediaMessages?: TAiMediaMessageRecord[];
+}) => {
+  const urlPrefix = `${process.env.NEXT_PUBLIC_POCKETBASE_URL}/api/files/aiMediaMessages/`;
+
+  const mediaFilePromises = p.mediaMessages?.map((x) =>
+    createFileFromMediaUrl({ url: `${urlPrefix}${x.id}/${x.file}` }),
+  );
+  const mediaFiles = (await Promise.all(mediaFilePromises ?? []))
+    .filter((x) => x.success)
+    .map((x) => x.data);
+
   return createAnthropicMessage({
-    role: messageRecord.role,
-    content: [{ type: "text", text: messageRecord.contentText }],
+    role: p.textMessage.role,
+    content: [
+      { type: "text", text: p.textMessage.contentText },
+      ...(await convertFilesToFileDetails(mediaFiles)),
+    ],
   });
 };
 
@@ -54,12 +72,12 @@ export const AiChatScreen = (p: { threadFriendlyId: string }) => {
     ? aiMediaMessagesRecordsStore.getMessagesByThreadId(currentThread.id)
     : undefined;
 
-  const aiTextWithMedia = (aiTextMessageRecords ?? [])
+  const aiTextWithMediaRecords = (aiTextMessageRecords ?? [])
     .map((x) => ({
-      textMessages: x,
+      textMessage: x,
       mediaMessages: aiMediaMessageRecords?.filter((y) => y.aiTextMessageId === x.id),
     }))
-    .sort((a, b) => (a.textMessages.created < b.textMessages.created ? -1 : 1));
+    .sort((a, b) => (a.textMessage.created < b.textMessage.created ? -1 : 1));
 
   const anthropicStore = useAnthropicStore();
   const anthropicInstance = anthropicStore.data;
@@ -74,27 +92,27 @@ export const AiChatScreen = (p: { threadFriendlyId: string }) => {
       <div className="flex h-full flex-col">
         <ScrollContainer scrollToBottomDeps={[threadFriendlyId]}>
           <div className="p-4 pb-0">
-            {aiTextWithMedia.length === 0 && (
+            {aiTextWithMediaRecords.length === 0 && (
               <AssistantMessage>Hello! How can I help you today?</AssistantMessage>
             )}
-            {aiTextWithMedia.map((x) => {
-              if (x.textMessages.role === "assistant")
+            {aiTextWithMediaRecords.map((x) => {
+              if (x.textMessage.role === "assistant")
                 return (
-                  <AssistantMessage key={x.textMessages.id}>
-                    {x.textMessages.contentText}
+                  <AssistantMessage key={x.textMessage.id}>
+                    {x.textMessage.contentText}
                   </AssistantMessage>
                 );
 
               return (
-                <React.Fragment key={x.textMessages.id}>
-                  <UserMessageText key={x.textMessages.id}>
-                    {x.textMessages.contentText}
+                <React.Fragment key={x.textMessage.id}>
+                  <UserMessageText key={x.textMessage.id}>
+                    {x.textMessage.contentText}
                   </UserMessageText>
                   {x.mediaMessages && (
                     <div className="flex gap-2 overflow-x-auto pt-2">
-                      {x.mediaMessages.map((media) => (
-                        <div key={media.id} className="h-20 w-20">
-                          <DisplayFilePreviewNew url={media.file} id={media.id} />
+                      {x.mediaMessages.map((mediaMessage) => (
+                        <div key={`${mediaMessage.id}-${x.textMessage.id}`} className="h-20 w-20">
+                          <DisplayFilePreviewNew url={mediaMessage.file} id={mediaMessage.id} />
                         </div>
                       ))}
                     </div>
@@ -152,12 +170,14 @@ export const AiChatScreen = (p: { threadFriendlyId: string }) => {
                     ...(await convertFilesToFileDetails(x.files)),
                   ],
                 });
-                const anthropicMessages = [
-                  ...(aiTextMessageRecords ?? []).map((x) =>
-                    convertAiTextMessageRecordToAnthropicMessage(x),
+
+                const anthropicMessagesFromRecords = await Promise.all(
+                  aiTextWithMediaRecords.map((x) =>
+                    convertAiTextAndMediaMessageRecordsToAnthropicMessage(x),
                   ),
-                  newUserMessage,
-                ];
+                );
+
+                const anthropicMessages = [...anthropicMessagesFromRecords, newUserMessage];
 
                 if (anthropicMessages.length > 2 && !thread.title) {
                   const resp = await createTitleForMessageThreadWithAnthropic({

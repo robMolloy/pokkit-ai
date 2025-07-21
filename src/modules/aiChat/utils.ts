@@ -12,7 +12,7 @@ export const convertFileToBase64 = async (file: File) => {
   return z.string().safeParse(resp.split(";base64,")[1]);
 };
 
-export const convertFileToChatMessageContentFromFile = async (file: File) => {
+const convertFileToFileDetails = async (file: File) => {
   const base64Resp = await convertFileToBase64(file);
 
   if (!base64Resp.success) return base64Resp;
@@ -25,7 +25,33 @@ export const convertFileToChatMessageContentFromFile = async (file: File) => {
 };
 
 export const convertFilesToFileDetails = async (files: File[]) => {
-  return (await Promise.all(files.map(convertFileToChatMessageContentFromFile)))
+  return (await Promise.all(files.map(convertFileToFileDetails)))
     .filter((x) => x.success)
     .map((x) => x.data);
+};
+
+const FILE_TYPE_MAP: Record<string, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  gif: "image/gif",
+  pdf: "application/pdf",
+};
+
+export const createFileFromMediaUrl = async (p: { url: string }) => {
+  try {
+    const fileName = p.url.split("/").pop() ?? "";
+    const fileExtension = fileName.split(".").pop() ?? "";
+    const fileType = FILE_TYPE_MAP[fileExtension] ?? "image/png";
+
+    const response = await fetch(p.url);
+    const blob = await response.blob();
+
+    const file = new File([blob], fileName, { type: fileType });
+
+    return { success: true, data: file } as const;
+  } catch (error) {
+    console.error(error);
+    return { success: false, error } as const;
+  }
 };
