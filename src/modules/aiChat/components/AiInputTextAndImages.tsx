@@ -98,7 +98,7 @@ export const AiInputTextAndMedia = (p: {
             <Button
               type="submit"
               disabled={p.disabled}
-              className="absolute bottom-3 right-1 h-8 w-8 p-0"
+              className="absolute bottom-2 right-2 h-8 w-8 p-0"
             >
               <CustomIcon iconName="Upload" size="sm" />
             </Button>

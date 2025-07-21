@@ -6,10 +6,7 @@ const aiMediaMessageRecordSchema = z.object({
   collectionName: z.string(),
   id: z.string(),
   threadId: z.string(),
-  contentType: z.enum(["image", "document"]),
-  contentSourceType: z.string(),
-  contentSourceData: z.string(),
-  contentSourceMediaType: z.string(),
+  file: z.string(),
   created: z.string(),
   updated: z.string(),
 });
@@ -21,8 +18,8 @@ export const createAiMediaMessageRecord = async (p: {
   pb: PocketBase;
   data: Omit<
     TAiMediaMessageRecord,
-    "collectionId" | "collectionName" | "id" | "created" | "updated"
-  >;
+    "collectionId" | "collectionName" | "id" | "file" | "created" | "updated"
+  > & { file: File };
 }) => {
   try {
     const resp = await p.pb.collection(collectionName).create(p.data);

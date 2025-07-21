@@ -15,6 +15,12 @@ export const DisplayFileImagePreview = (p: { file: File }) => {
   );
 };
 
+export const DisplayFilePreviewNew = (p: { url: string; id: string }) => {
+  const url = `${process.env.NEXT_PUBLIC_POCKETBASE_URL}/api/files/aiMediaMessages/${p.id}/${p.url}`;
+
+  return <object data={url} className="h-full w-full rounded-md"></object>;
+};
+
 export const DisplayFilePdfPreview = (p: { file: File }) => {
   const url = useFileUrl(p.file);
 

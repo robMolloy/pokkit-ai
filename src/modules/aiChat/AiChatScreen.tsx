@@ -1,4 +1,5 @@
 import { MainLayout } from "@/components/layout/Layout";
+import { pb } from "@/config/pocketbaseConfig";
 import {
   AssistantMessage,
   DisplayChatMessageRecords,
@@ -10,23 +11,25 @@ import { useAnthropicStore } from "@/modules/providers/anthropicStore";
 import { ErrorScreen } from "@/screens/ErrorScreen";
 import { LoadingScreen } from "@/screens/LoadingScreen";
 import { useState } from "react";
+import { useAiMediaMessageRecordsStore } from "../aiMediaMessages/aiMediaMessageRecordsStore";
+import { createAiMediaMessageRecord } from "../aiMediaMessages/dbAiMediaMessageUtils";
 import { useAiTextMessageRecordsStore } from "../aiTextMessages/aiTextMessageRecordsStore";
-import { AiInputTextAndMedia } from "./components/AiInputTextAndImages";
+import {
+  createAiTextMessageRecord,
+  TAiTextMessageRecord,
+} from "../aiTextMessages/dbAiTextMessageUtils";
+import {
+  createAiThreadRecord,
+  updateAiThreadRecordTitle,
+} from "../aiThreads/dbAiThreadRecordUtils";
 import {
   callAnthropic,
   createAnthropicMessage,
   createTitleForMessageThreadWithAnthropic,
 } from "../providers/anthropicApi";
+import { AiInputTextAndMedia } from "./components/AiInputTextAndImages";
+import { DisplayFilePreviewNew } from "./components/FilePreviews";
 import { convertFilesToFileDetails } from "./utils";
-import {
-  createAiTextMessageRecord,
-  TAiTextMessageRecord,
-} from "../aiTextMessages/dbAiTextMessageUtils";
-import { pb } from "@/config/pocketbaseConfig";
-import {
-  createAiThreadRecord,
-  updateAiThreadRecordTitle,
-} from "../aiThreads/dbAiThreadRecordUtils";
 
 const convertAiTextMessageRecordToAnthropicMessage = (messageRecord: TAiTextMessageRecord) => {
   return createAnthropicMessage({
@@ -41,9 +44,14 @@ export const AiChatScreen = (p: { threadId: string }) => {
   const aiThreadRecordsStore = useAiThreadRecordsStore();
   const currentThread = aiThreadRecordsStore.data?.find((x) => x.friendlyId === threadId);
 
-  const aiTextMessagesStore = useAiTextMessageRecordsStore();
-  const storeMessages = currentThread?.id
-    ? aiTextMessagesStore.getMessagesByThreadId(currentThread.id)
+  const aiTextMessagesRecordsStore = useAiTextMessageRecordsStore();
+  const aiTextMessageRecords = currentThread?.id
+    ? aiTextMessagesRecordsStore.getMessagesByThreadId(currentThread.id)
+    : undefined;
+
+  const aiMediaMessagesRecordsStore = useAiMediaMessageRecordsStore();
+  const aiMediaMessageRecords = currentThread?.id
+    ? aiMediaMessagesRecordsStore.getMessagesByThreadId(currentThread.id)
     : undefined;
 
   const anthropicStore = useAnthropicStore();
@@ -59,13 +67,23 @@ export const AiChatScreen = (p: { threadId: string }) => {
       <div className="flex h-full flex-col">
         <ScrollContainer scrollToBottomDeps={[threadId]}>
           <div className="p-4 pb-0">
-            {!storeMessages && (
+            {!aiTextMessageRecords && (
               <AssistantMessage>Hello! How can I help you today?</AssistantMessage>
             )}
-            {storeMessages && (
+            {aiTextMessageRecords && (
               <DisplayChatMessageRecords
-                messages={storeMessages.sort((a, b) => (a.created < b.created ? -1 : 1))}
+                messages={aiTextMessageRecords.sort((a, b) => (a.created < b.created ? -1 : 1))}
               />
+            )}
+
+            {aiMediaMessageRecords && (
+              <div className="flex gap-2 overflow-x-auto">
+                {aiMediaMessageRecords.map((x) => (
+                  <div key={x.id} className="h-32 w-32">
+                    <DisplayFilePreviewNew url={x.file} id={x.id} />
+                  </div>
+                ))}
+              </div>
             )}
 
             {mode === "thinking" && <p>Thinking...</p>}
@@ -98,6 +116,11 @@ export const AiChatScreen = (p: { threadId: string }) => {
                   data: { threadId: thread.id, role: "user", contentText: x.text },
                 });
 
+                const promises = x.files.map((file) =>
+                  createAiMediaMessageRecord({ pb, data: { threadId: thread.id, file } }),
+                );
+                await Promise.all(promises);
+
                 const newUserMessage = createAnthropicMessage({
                   role: "user",
                   content: [
@@ -106,7 +129,7 @@ export const AiChatScreen = (p: { threadId: string }) => {
                   ],
                 });
                 const anthropicMessages = [
-                  ...(storeMessages ?? []).map((x) =>
+                  ...(aiTextMessageRecords ?? []).map((x) =>
                     convertAiTextMessageRecordToAnthropicMessage(x),
                   ),
                   newUserMessage,
