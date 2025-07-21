@@ -13,12 +13,12 @@ import { ErrorScreen } from "@/screens/ErrorScreen";
 import { LoadingScreen } from "@/screens/LoadingScreen";
 import React, { useState } from "react";
 import {
-  useAiMediaMessageRecordsStore,
+  useAiMediaMessageRecordsWithCachedFilesStore,
   useCachedFilesStore,
 } from "../aiMediaMessages/aiMediaMessageRecordsStore";
 import {
   createAiMediaMessageRecord,
-  TAiMediaMessageRecord,
+  TAiMediaMessageRecordWithCachedFile,
 } from "../aiMediaMessages/dbAiMediaMessageUtils";
 import { useAiTextMessageRecordsStore } from "../aiTextMessages/aiTextMessageRecordsStore";
 import {
@@ -35,20 +35,15 @@ import {
   createTitleForMessageThreadWithAnthropic,
 } from "../providers/anthropicApi";
 import { AiInputTextAndMedia } from "./components/AiInputTextAndImages";
-import { convertFilesToFileDetails, createFileFromMediaUrl } from "./utils";
+import { convertFilesToFileDetails } from "./utils";
 
-const convertAiTextAndMediaMessageRecordsToAnthropicMessage = async (p: {
+export const createAnthropicMessageFromAiTextAndMediaMessageWithCachedFileRecords = async (p: {
   textMessage: TAiTextMessageRecord;
-  mediaMessages?: TAiMediaMessageRecord[];
+  mediaMessagesWithCachedFiles?: TAiMediaMessageRecordWithCachedFile[];
 }) => {
-  const urlPrefix = `${process.env.NEXT_PUBLIC_POCKETBASE_URL}/api/files/aiMediaMessages/`;
-
-  const mediaFilePromises = p.mediaMessages?.map((x) =>
-    createFileFromMediaUrl({ url: `${urlPrefix}${x.id}/${x.file}` }),
-  );
-  const mediaFiles = (await Promise.all(mediaFilePromises ?? []))
-    .filter((x) => x.success)
-    .map((x) => x.data);
+  const mediaFiles = (p.mediaMessagesWithCachedFiles ?? [])
+    .map((x) => x.file)
+    .filter((x) => x !== undefined);
 
   return createAnthropicMessage({
     role: p.textMessage.role,
@@ -72,9 +67,13 @@ export const AiChatScreen = (p: { threadFriendlyId: string }) => {
     ? aiTextMessagesRecordsStore.getMessagesByThreadId(currentThread.id)
     : undefined;
 
-  const aiMediaMessagesRecordsStore = useAiMediaMessageRecordsStore();
+  // const aiMediaMessagesRecordsStore = useAiMediaMessageRecordsStore();
+  // const aiMediaMessageRecords = currentThread?.id
+  //   ? aiMediaMessagesRecordsStore.getMessagesByThreadId(currentThread.id)
+  //   : undefined;
+  const aiMediaMessageRecordsWithCachedFilesStore = useAiMediaMessageRecordsWithCachedFilesStore();
   const aiMediaMessageRecords = currentThread?.id
-    ? aiMediaMessagesRecordsStore.getMessagesByThreadId(currentThread.id)
+    ? aiMediaMessageRecordsWithCachedFilesStore.getMessagesByThreadId(currentThread.id)
     : undefined;
 
   const aiTextWithMediaRecords = (aiTextMessageRecords ?? [])
@@ -174,7 +173,7 @@ export const AiChatScreen = (p: { threadFriendlyId: string }) => {
 
                 const anthropicMessagesFromRecords = await Promise.all(
                   aiTextWithMediaRecords.map((x) =>
-                    convertAiTextAndMediaMessageRecordsToAnthropicMessage(x),
+                    createAnthropicMessageFromAiTextAndMediaMessageWithCachedFileRecords(x),
                   ),
                 );
 

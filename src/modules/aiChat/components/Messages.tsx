@@ -1,8 +1,8 @@
 import { CustomIcon } from "@/components/CustomIcon";
 import { Card, CardContent } from "@/components/ui/card";
+import { TAiMediaMessageRecordWithCachedFile } from "@/modules/aiMediaMessages/dbAiMediaMessageUtils";
 import Markdown from "react-markdown";
 import { DisplayFilePreviewNew } from "./FilePreviews";
-import { TAiMediaMessageRecord } from "@/modules/aiMediaMessages/dbAiMediaMessageUtils";
 
 export const AssistantTextMessage = (p: { children: string }) => {
   return (
@@ -25,12 +25,14 @@ export const UserTextMessage = (p: { children: string }) => {
     </div>
   );
 };
-export const UserMediaMessages = (p: { mediaMessageRecords: TAiMediaMessageRecord[] }) => {
+export const UserMediaMessages = (p: {
+  mediaMessageRecords: TAiMediaMessageRecordWithCachedFile[];
+}) => {
   return (
     <div className="flex gap-2 overflow-x-auto pt-2">
       {p.mediaMessageRecords.map((mediaMessage) => (
         <div key={mediaMessage.id} className="h-20 w-20">
-          <DisplayFilePreviewNew url={mediaMessage.file} id={mediaMessage.id} />
+          <DisplayFilePreviewNew url={mediaMessage.fileUrl} id={mediaMessage.id} />
         </div>
       ))}
     </div>

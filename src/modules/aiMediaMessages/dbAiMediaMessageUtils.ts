@@ -12,6 +12,10 @@ const aiMediaMessageRecordSchema = z.object({
   updated: z.string(),
 });
 export type TAiMediaMessageRecord = z.infer<typeof aiMediaMessageRecordSchema>;
+export type TAiMediaMessageRecordWithCachedFile = Omit<TAiMediaMessageRecord, "file"> & {
+  file: File | undefined;
+  fileUrl: string;
+};
 
 const collectionName = "aiMediaMessages";
 

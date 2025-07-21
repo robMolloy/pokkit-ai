@@ -55,3 +55,17 @@ export const useCachedFilesStoreWatcher = () => {
     });
   }, [aiMediaMessageRecordsStore.data]);
 };
+
+export const useAiMediaMessageRecordsWithCachedFilesStore = () => {
+  const aiMediaMessageRecordsStore = useAiMediaMessageRecordsStore();
+  const cachedFilesStore = useCachedFilesStore();
+
+  const data = aiMediaMessageRecordsStore.data?.map((x) => {
+    const file = cachedFilesStore.data[x.file];
+    return { ...x, file, fileUrl: x.file };
+  });
+
+  const getMessagesByThreadId = (threadId: string) => data?.filter((x) => x.threadId === threadId);
+
+  return { data, getMessagesByThreadId };
+};
